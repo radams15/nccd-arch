@@ -1,5 +1,7 @@
 ip addr add 80.64.157.254 dev eth0
-ip addr add 192.168.0.1 dev eth1
+ip addr add 192.168.0.1/24 dev eth1
 
 ip link set eth0 up
 ip link set eth1 up
+
+ip r a default via 80.64.157.254 # Go via internet
