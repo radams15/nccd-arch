@@ -1,0 +1,29 @@
+# Test a tcp connection
+
+nc -v <ip address> <port>
+
+# Test a udp connection (probably can be done with NC, but NMAP FTW)
+
+nmap -sU -p <port> <ip address>
+
+# Test DNS Server
+
+host -t a <domain name> <ip of DNS server>
+
+[INTERNAL DNS TEST]   host -t a vpn.fido22.cyber.test 80.64.41.131
+[EXTERNAL DNS TEST]   host -t a this.test.com 8.8.8.8
+[RECURSION DNS TEST]  host -t a this.test.com 80.64.41.131
+
+# web page retrieval
+
+wget faceybooky.com
+wget --no-check-certificate https://faceybooky.com
+
+# Test Proxy HTTP and HTTPD
+
+export http_proxy="<ip address>:<port>"
+export https_proxy="<ip address>:<port>"
+
+# Test if squid proxy is logging
+
+tail -f /var/log/squid/access.log

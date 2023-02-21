@@ -1,0 +1,16 @@
+Ext-DNS eth0 8.8.8.8/24
+Ext-Office eth0 22.39.224.18/30
+Ext-WWW eth0 201.224.19.7/16
+Int-DNS eth0 80.64.41.131/16
+Internet eth0 201.224.131.22/16
+Internet eth1 8.8.8.1/24
+Internet eth2 22.39.224.17/30
+Internet eth3 80.64.157.254/16
+Int-WWW eth0 80.64.98.155/16
+LDAP eth0 80.64.34.21/16
+Mail eth0 80.64.139.114/16
+OpenVPN eth0 80.64.89.215/16
+Squid eth0 80.64.37.201/16
+Staff-1 eth0 80.64.81.121/16
+Staff-2 eth0 80.64.69.201/16
+Staff-3 eth0 80.64.99.159/16
