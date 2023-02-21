@@ -1,4 +1,4 @@
 # fido additions
-nameserver 80.64.41.131
+nameserver 172.16.0.3
 search fido22.cyber.test
 
