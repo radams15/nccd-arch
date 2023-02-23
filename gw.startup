@@ -12,6 +12,31 @@ ip r a 10.0.0.0/20 via 192.168.0.3
 ip r a default via 80.64.157.254
 
 
+######### Firewall Rules #########
+
+iptables --policy FORWARD DROP
+iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT # Allow established connections
+
+for mp in 25 587 993
+do
+	iptables -A FORWARD \
+		-m state \
+		--state NEW \
+		-p tcp \
+		-d 172.16.0.6 \
+		--dport $mp \
+		-j ACCEPT
+done
+
+iptables -A FORWARD \
+	-m state \
+	--state NEW \
+	-p tcp \
+	-d 10.0.0.2 \
+	--dport 1194 \
+	-j ACCEPT
+
+
 ######### NAT Setup #########
 
 # DNAT these ports to the mail server at 172.16.0.6
