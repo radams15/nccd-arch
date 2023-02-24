@@ -6,3 +6,7 @@ ip link set eth1 up
 
 ip r a default via 192.168.0.1
 ip r a 10.0.0.0/20 via 192.168.0.3 # Get to staff network via r2
+
+######### Firewall Rules #########
+
+iptables --policy FORWARD DROP
