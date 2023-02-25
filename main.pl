@@ -184,85 +184,8 @@ my $ext_office = Machine->new (
 	],
 );
 
+
 # Internal
-
-my $r1 = Machine->new (
-	name => 'r1',
-	interfaces => [
-		Interface->new (
-			eth => 0,
-			ip => '192.168.0.2/24',
-		),
-		Interface->new (
-			eth => 1,
-			ip => '172.16.0.1/24',
-		),
-	],
-	routes => [
-		Route->new (
-			dst => 'default',
-			via => '192.168.0.1'
-		),
-		Route->new (
-			dst => '10.0.0.0/20',
-			via => '192.168.0.3'
-		),
-	],
-	attachments => [
-		Attachment->new (
-			lan => $dmz_lan,
-			eth => 0
-		),
-		Attachment->new (
-			lan => $internal_dmz_lan,
-			eth => 1
-		),
-	],
-	rules => [
-		Rule->new (
-			policy => 'FORWARD DROP',
-		),
-	],
-);
-
-my $r2 = Machine->new (
-	name => 'r2',
-	interfaces => [
-		Interface->new (
-			eth => 0,
-			ip => '192.168.0.3/24',
-		),
-		Interface->new (
-			eth => 1,
-			ip => '10.0.0.1/20',
-		),
-	],
-	routes => [
-		Route->new (
-			dst => 'default',
-			via => '192.168.0.1'
-		),
-		Route->new (
-			dst => '172.16.0.0/24',
-			via => '192.168.0.2'
-		),
-	],
-	attachments => [
-		Attachment->new (
-			lan => $dmz_lan,
-			eth => 0
-		),
-		Attachment->new (
-			lan => $staff_lan,
-			eth => 1
-		),
-	],
-	rules => [
-		Rule->new (
-			policy => 'FORWARD DROP',
-		),
-	],
-);
 
 my $int_dns = Machine->new (
 	name => 'Int-DNS',
@@ -408,6 +331,160 @@ my $vpn = Machine->new (
 my $staff_1 = &make_staff(1, $staff_lan);
 my $staff_2 = &make_staff(2, $staff_lan);
 my $staff_3 = &make_staff(3, $staff_lan);
+
+# Routers
+
+my $r1 = Machine->new (
+	name => 'r1',
+	interfaces => [
+		Interface->new (
+			eth => 0,
+			ip => '192.168.0.2/24',
+		),
+		Interface->new (
+			eth => 1,
+			ip => '172.16.0.1/24',
+		),
+	],
+	routes => [
+		Route->new (
+			dst => 'default',
+			via => '192.168.0.1'
+		),
+		Route->new (
+			dst => '10.0.0.0/20',
+			via => '192.168.0.3'
+		),
+	],
+	attachments => [
+		Attachment->new (
+			lan => $dmz_lan,
+			eth => 0
+		),
+		Attachment->new (
+			lan => $internal_dmz_lan,
+			eth => 1
+		),
+	],
+	rules => [
+		Rule->new (
+			policy => 'FORWARD DROP',
+		),
+		
+		Rule->new (
+			chain => 'FORWARD',
+			stateful => 1,
+			proto => 'tcp',
+			dport => 443,
+			dst => ($int_www->ips)[0],
+			src => '10.0.0.0/20',
+			action => 'ACCEPT',
+		),
+		Rule->new (
+			chain => 'FORWARD',
+			proto => 'udp',
+			dport => 53,
+			dst => ($int_dns->ips)[0],
+			src => '10.0.0.0/20',
+			action => 'ACCEPT',
+		),
+		
+		Rule->new (
+			chain => 'FORWARD',
+			stateful => 1,
+			proto => 'tcp',
+			dport => 389,
+			dst => ($ldap->ips)[0],
+			src => '10.0.0.0/20',
+			action => 'ACCEPT',
+		),
+		Rule->new (
+			chain => 'FORWARD',
+			proto => 'udp',
+			dport => 389,
+			dst => ($ldap->ips)[0],
+			src => '10.0.0.0/20',
+			action => 'ACCEPT',
+		),
+		
+		Rule->new (
+			chain => 'FORWARD',
+			stateful => 1,
+			proto => 'tcp',
+			dport => 3128,
+			dst => ($squid->ips)[0],
+			src => '10.0.0.0/20',
+			action => 'ACCEPT',
+		),
+		
+		Rule->new (
+			chain => 'FORWARD',
+			stateful => 1,
+			proto => 'tcp',
+			dport => 25,
+			dst => ($mail->ips)[0],
+			src => '10.0.0.0/20',
+			action => 'ACCEPT',
+		),
+		Rule->new (
+			chain => 'FORWARD',
+			stateful => 1,
+			proto => 'tcp',
+			dport => 587,
+			dst => ($mail->ips)[0],
+			src => '10.0.0.0/20',
+			action => 'ACCEPT',
+		),
+		Rule->new (
+			chain => 'FORWARD',
+			stateful => 1,
+			proto => 'tcp',
+			dport => 993,
+			dst => ($mail->ips)[0],
+			src => '10.0.0.0/20',
+			action => 'ACCEPT',
+		),
+	],
+);
+
+my $r2 = Machine->new (
+	name => 'r2',
+	interfaces => [
+		Interface->new (
+			eth => 0,
+			ip => '192.168.0.3/24',
+		),
+		Interface->new (
+			eth => 1,
+			ip => '10.0.0.1/20',
+		),
+	],
+	routes => [
+		Route->new (
+			dst => 'default',
+			via => '192.168.0.1'
+		),
+		Route->new (
+			dst => '172.16.0.0/24',
+			via => '192.168.0.2'
+		),
+	],
+	attachments => [
+		Attachment->new (
+			lan => $dmz_lan,
+			eth => 0
+		),
+		Attachment->new (
+			lan => $staff_lan,
+			eth => 1
+		),
+	],
+	rules => [
+		Rule->new (
+			policy => 'FORWARD DROP',
+		),
+	],
+);
 
 
 
