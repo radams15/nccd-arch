@@ -27,6 +27,11 @@ my $staff_lan = Lan->new ('Staff');
 ####### VLANs #######
 
 my $management_vlan = Vlan->new (111);
+my $int_dns_vlan = Vlan->new (222);
+my $int_www_vlan = Vlan->new (333);
+my $ldap_vlan = Vlan->new (444);
+my $proxy_vlan = Vlan->new (555);
+my $mail_vlan = Vlan->new (666);
 
 ####### Machines #######
 
@@ -200,6 +205,7 @@ my $int_dns = Machine->new (
 	attachments => [
 		Attachment->new (
 			lan => $internal_dmz_lan,
+			vlan => $int_dns_vlan, 
 			eth => 0
 		),
 	],
@@ -223,6 +229,7 @@ my $int_www = Machine->new (
 	attachments => [
 		Attachment->new (
 			lan => $internal_dmz_lan,
+			vlan => $int_www_vlan, 
 			eth => 0
 		),
 	],
@@ -246,6 +253,7 @@ my $ldap = Machine->new (
 	attachments => [
 		Attachment->new (
 			lan => $internal_dmz_lan,
+			vlan => $ldap_vlan, 
 			eth => 0
 		),
 	],
@@ -269,6 +277,7 @@ my $mail = Machine->new (
 	attachments => [
 		Attachment->new (
 			lan => $internal_dmz_lan,
+			vlan => $mail_vlan, 
 			eth => 0
 		),
 	],
@@ -292,6 +301,7 @@ my $squid = Machine->new (
 	attachments => [
 		Attachment->new (
 			lan => $internal_dmz_lan,
+			vlan => $proxy_vlan, 
 			eth => 0
 		),
 	],
@@ -321,12 +331,6 @@ my $vpn = Machine->new (
 	],
 	extra => "\nsystemctl start ncat-tcp-broker\@1194",
 );
-
-
-
-my $staff_1 = &make_staff(1, $staff_lan);
-my $staff_2 = &make_staff(2, $staff_lan);
-my $staff_3 = &make_staff(3, $staff_lan);
 
 # Routers
 
@@ -486,13 +490,17 @@ my $r2 = Machine->new (
 
 ####### Extra Configuration #######
 
-my @machines = (
-	$gw,
+# Machines to dump to the output folder.
+
+my @external_machines = (
 	$internet,
-	$ext_dns,
-	$int_dns,
-	$ext_www,
 	$ext_office,
+	$ext_dns,
+	$ext_www,
+);
+
+my @internal_machines = (
+	$gw,
 	$r1,
 	$r2,
 	$int_dns,
@@ -501,24 +509,32 @@ my @machines = (
 	$mail,
 	$squid,
 	$vpn,
-	$staff_1,
-	$staff_2,
-	$staff_3
 );
 
+# Add 3 staff machines, cannot change to more without adding more Staff folders in the data directory.
+for my $staff_id (1..3) {
+	my $staff_machine = &make_staff($staff_id, $staff_lan);
+	push @internal_machines, $staff_machine;
+}
 
-for my $machine (@machines) { # Add every machine to the management VLAN
+# Associate r1 with every vlan in the internal DMZ.
+for my $vlan ($int_www_vlan, $int_dns_vlan, $ldap_vlan, $proxy_vlan, $mail_vlan) { 
+	push @{$r1->{attachments}}, Attachment->new ( vlan => $vlan, eth=>1 );
+}
+
+# Add every interface on every internal machine to the management VLAN.
+for my $machine (@internal_machines) {
 	for my $interface (@{$machine->{interfaces}}) {
 		push @{$machine->{attachments}}, Attachment->new ( vlan => $management_vlan, eth=>$interface->{eth} );
 	}
 }
 
 
+# DNAT mail ports from the gateway to the mailserver on the internal DMZ.
 dnat (
 	src => $gw,
 	dst =>'172.16.0.6',
 	ports => [25, 587, 993]
 );
 
-
-$lab->dump(@machines);
+$lab->dump(@external_machines, @internal_machines);
