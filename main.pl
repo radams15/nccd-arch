@@ -3,18 +3,10 @@
 use strict;
 use warnings;
 
-use Netkit::Machine;
-use Netkit::Lan;
-use Netkit::Lab;
-use Netkit::Interface;
-use Netkit::Route;
-use Netkit::Attachment;
-use Netkit::Rule;
-
+use Netkit;
 
 require './staff.pl';
 require './util.pl';
-
 
 
 my $lab = Lab->new (
@@ -31,6 +23,10 @@ my $ext_dns_lan = Lan->new ('ExtDns');
 my $dmz_lan = Lan->new ('Dmz');
 my $internal_dmz_lan = Lan->new ('InternalDmz');
 my $staff_lan = Lan->new ('Staff');
+
+####### VLANs #######
+
+my $management_vlan = Vlan->new (111);
 
 ####### Machines #######
 
@@ -490,14 +486,7 @@ my $r2 = Machine->new (
 
 ####### Extra Configuration #######
 
-
-dnat (
-	src => $gw,
-	dst =>'172.16.0.6',
-	ports => [25, 587, 993]
-);
-
-$lab->dump(
+my @machines = (
 	$gw,
 	$internet,
 	$ext_dns,
@@ -514,5 +503,22 @@ $lab->dump(
 	$vpn,
 	$staff_1,
 	$staff_2,
-	$staff_3,
+	$staff_3
 );
+
+
+for my $machine (@machines) { # Add every machine to the management VLAN
+	for my $interface (@{$machine->{interfaces}}) {
+		push @{$machine->{attachments}}, Attachment->new ( vlan => $management_vlan, eth=>$interface->{eth} );
+	}
+}
+
+
+dnat (
+	src => $gw,
+	dst =>'172.16.0.6',
+	ports => [25, 587, 993]
+);
+
+
+$lab->dump(@machines);

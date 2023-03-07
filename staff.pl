@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Netkit::Machine;
+use Netkit;
 
 sub make_staff {
 	my ($id, $lan) = @_;
