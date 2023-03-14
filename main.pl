@@ -206,7 +206,7 @@ my $int_dns = Machine->new (
 	],
 	attachments => [
 		Attachment->new (
-			lan => $internal_dmz_lan,
+			lan => $a0_lans[1],
 			vlan => $int_dns_vlan, 
 			eth => 0
 		),
@@ -230,7 +230,7 @@ my $int_www = Machine->new (
 	],
 	attachments => [
 		Attachment->new (
-			lan => $internal_dmz_lan,
+			lan => $a0_lans[0],
 			vlan => $int_www_vlan, 
 			eth => 0
 		),
@@ -254,7 +254,7 @@ my $ldap = Machine->new (
 	],
 	attachments => [
 		Attachment->new (
-			lan => $internal_dmz_lan,
+			lan => $a0_lans[2],
 			vlan => $ldap_vlan, 
 			eth => 0
 		),
@@ -278,7 +278,7 @@ my $mail = Machine->new (
 	],
 	attachments => [
 		Attachment->new (
-			lan => $internal_dmz_lan,
+			lan => $a0_lans[4],
 			vlan => $mail_vlan, 
 			eth => 0
 		),
@@ -302,7 +302,7 @@ my $squid = Machine->new (
 	],
 	attachments => [
 		Attachment->new (
-			lan => $internal_dmz_lan,
+			lan => $a0_lans[3],
 			vlan => $proxy_vlan, 
 			eth => 0
 		),
@@ -348,7 +348,8 @@ my $a0 = Machine->new (
 		map {
 			Interface->new(eth=>$_, mac=>"08:00:4e:a0:a0:0$_", group=>22);
 		} (1..5)
-	]
+	],
+	attachments => [map {Attachment->new (lan => $a0_lans[$_-1], eth => $_)} (1..@a0_lans)]
 );
 
 # Routers
