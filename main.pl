@@ -24,6 +24,8 @@ my $dmz_lan = Lan->new ('Dmz');
 my $internal_dmz_lan = Lan->new ('InternalDmz');
 my $staff_lan = Lan->new ('Staff');
 
+my @a0_lans = map {Lan->new("a0$_");} (1..5);
+
 ####### VLANs #######
 
 my $management_vlan = Vlan->new (111);
@@ -328,6 +330,18 @@ my $staff_1 = &make_staff(1, $staff_lan);
 my $staff_2 = &make_staff(2, $staff_lan);
 my $staff_3 = &make_staff(3, $staff_lan);
 
+# Switches
+
+my $a0 = Machine->new (
+	name => 'a0',
+	interfaces => [
+		Interface->new(eth=>0, mac=>"08:00:4e:a0:a0:00", group=>11),
+		map {
+			Interface->new(eth=>$_, mac=>"08:00:4e:a0:a0:0$_", group=>22);
+		} (1..5)
+	]
+);
+
 # Routers
 
 my $r1 = Machine->new (
@@ -493,6 +507,7 @@ my @machines = (
 	$int_dns,
 	$ext_www,
 	$ext_office,
+	$a0,
 	$r1,
 	$r2,
 	$int_dns,
