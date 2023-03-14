@@ -22,7 +22,8 @@ my $ext_office_lan = Lan->new ('ExtOffice');
 my $ext_dns_lan = Lan->new ('ExtDns');
 my $dmz_lan = Lan->new ('Dmz');
 my $internal_dmz_lan = Lan->new ('InternalDmz');
-my $staff_lan = Lan->new ('Staff');
+my $finance_lan = Lan->new ('Finance');
+my $hr_lan = Lan->new ('Hr');
 
 my @a0_lans = map {Lan->new("a0$_");} (1..5);
 
@@ -327,29 +328,30 @@ my $vpn = Machine->new (
 	],
 	attachments => [
 		Attachment->new (
-			lan => $staff_lan,
+			lan => $finance_lan,
 			eth => 0
 		),
 	],
 	extra => "\nsystemctl start ncat-tcp-broker\@1194",
 );
 
-
-my $staff_1 = &make_staff(1, $staff_lan);
-my $staff_2 = &make_staff(2, $staff_lan);
-my $staff_3 = &make_staff(3, $staff_lan);
-
 # Switches
 
 my $a0 = Machine->new (
 	name => 'a0',
 	interfaces => [
-		Interface->new(eth=>0, mac=>"08:00:4e:a0:a0:00", group=>11),
+		Interface->new(eth=>0, mac=>"08:00:4e:a0:a0:00"),
 		map {
-			Interface->new(eth=>$_, mac=>"08:00:4e:a0:a0:0$_", group=>22);
+			Interface->new(eth=>$_, mac=>"08:00:4e:a0:a0:0$_");
 		} (1..5)
 	],
-	attachments => [map {Attachment->new (lan => $a0_lans[$_-1], eth => $_)} (1..@a0_lans)]
+	attachments => [
+		Attachment->new (lan => $dmz_lan, eth => 0),
+		map {
+			Attachment->new (lan => $a0_lans[$_-1], eth => $_)
+		} (1..@a0_lans)		
+	],
+	switch => 1
 );
 
 # Routers
@@ -476,7 +478,11 @@ my $r2 = Machine->new (
 		),
 		Interface->new (
 			eth => 1,
-			ip => '10.0.0.1/20',
+			ip => '10.0.0.1/24',
+		),
+		Interface->new (
+			eth => 2,
+			ip => '10.0.1.1/24',
 		),
 	],
 	routes => [
@@ -495,8 +501,12 @@ my $r2 = Machine->new (
 			eth => 0
 		),
 		Attachment->new (
-			lan => $staff_lan,
+			lan => $finance_lan,
 			eth => 1
+		),
+		Attachment->new (
+			lan => $hr_lan,
+			eth => 2
 		),
 	],
 	rules => [
@@ -517,7 +527,6 @@ my @external_machines = (
 	$ext_office,
 	$ext_dns,
 	$ext_www,
-	$ext_office,
 );
 
 my @internal_machines = (
@@ -533,16 +542,24 @@ my @internal_machines = (
 	$vpn,
 );
 
-# Add 3 staff machines, cannot change to more without adding more Staff folders in the data directory.
+# Add 3 finance machines.
 for my $staff_id (1..3) {
-	my $staff_machine = &make_staff($staff_id, $staff_lan);
+	my $staff_machine = &make_staff('Finance', $staff_id, $finance_lan, '10.0.0.%d/24');
 	push @internal_machines, $staff_machine;
 }
 
+# Add 3 HR machines.
+for my $staff_id (1..3) {
+	my $staff_machine = &make_staff('HR', $staff_id, $hr_lan, '10.0.1.%d/24');
+	push @internal_machines, $staff_machine;
+}
+
+=pod
 # Associate r1 with every vlan in the internal DMZ.
 for my $vlan ($int_www_vlan, $int_dns_vlan, $ldap_vlan, $proxy_vlan, $mail_vlan) { 
 	push @{$r1->{attachments}}, Attachment->new ( vlan => $vlan, eth=>1 );
 }
+=cut
 
 # Add every interface on every internal machine to the management VLAN.
 for my $machine (@internal_machines) {

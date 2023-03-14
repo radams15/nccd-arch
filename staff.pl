@@ -6,22 +6,22 @@ use warnings;
 use Netkit;
 
 sub make_staff {
-	my ($id, $lan) = @_;
+	my ($designation, $id, $lan, $lan_mask) = @_;
 	
 	my $last_ip_digit = 4 + $id;
 	
 	Machine->new (
-		name => "Staff-$id",
+		name => "Staff-$designation-$id",
 		interfaces => [
 			Interface->new (
 				eth => 0,
-				ip => "10.0.0.$last_ip_digit/20",
+				ip => sprintf($lan_mask, $last_ip_digit),
 			),
 		],
 		routes => [
 			Route->new (
 				dst => 'default',
-				via => '10.0.0.1'
+				via => sprintf($lan_mask, 1)
 			),
 		],
 		attachments => [
@@ -30,6 +30,11 @@ sub make_staff {
 				eth => 0,
 			),
 		],
+		extra => "\
+cat > /etc/resolv.conf << EOF
+nameserver 80.64.41.131
+search fido22.cyber.test
+EOF",
 	);
 }
 
