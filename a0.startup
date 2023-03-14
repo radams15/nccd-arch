@@ -1,3 +1,4 @@
+ip link set dev eth0 address 08:00:4e:a0:a0:00
 ip link set dev eth1 address 08:00:4e:a0:a0:01
 ip link set dev eth2 address 08:00:4e:a0:a0:02
 ip link set dev eth3 address 08:00:4e:a0:a0:03
@@ -5,6 +6,7 @@ ip link set dev eth4 address 08:00:4e:a0:a0:04
 ip link set dev eth5 address 08:00:4e:a0:a0:05
 
 
+ip link set dev eth0 group 11
 ip link set dev eth1 group 11
 ip link set dev eth2 group 11
 ip link set dev eth3 group 11
