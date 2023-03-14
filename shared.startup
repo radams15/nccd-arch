@@ -1,3 +1,0 @@
-echo "Re-running 'resolvconf -u' to regenerate /etc/resolv.conf"
-echo ".. re-run needed to incorporate host-specific files"
-resolvconf -u
