@@ -407,7 +407,7 @@ my $r1 = Machine->new (
 			proto => 'tcp',
 			dport => 993,
 			dst => ($mail->ips)[0],
-			src => '10.0.0.0/20',
+			src => 'eth0',
 			action => 'ACCEPT',
 		),
 	],
@@ -470,9 +470,10 @@ my $a0 = Machine->new (
 		} (1..5),
 	],
 	attachments => [
-		Attachment->new (lan => $dmz_lan, eth => 0),
+		Attachment->new (lan => $internal_dmz_lan, eth => 0),
 	],
-	switch => 1
+	switch => 1,
+	extra => "\nip link set dev sw0 address 08:00:4e:a0:a0:00\n"
 );
 
 
@@ -517,25 +518,18 @@ for my $staff_id (1..3) {
 
 
 
-=pod
 # Associate r1 with every vlan in the internal DMZ.
 for my $vlan ($int_www_vlan, $int_dns_vlan, $ldap_vlan, $proxy_vlan, $mail_vlan) { 
 	push @{$r1->{attachments}}, Attachment->new ( vlan => $vlan, eth=>1 );
 }
-=cut
 
 
 # Connect all the internal DMZ devices to the switch
-my $a0_eth = 1;
-for($int_dns, $int_www, $ldap, $mail, $squid) {
-	my $name = Attachment::generate_lan_name($a0, $_); # Generate a unique lan name.
-	my $lan = Lan->new($name); # Make a new 2-device LAN.
-	
-	push @{$_->{attachments}}, Attachment->new (lan => $lan, eth => 0);
-	push @{$a0->{attachments}}, Attachment->new (lan => $lan, eth => $a0_eth);
-	
-	$a0_eth++;
-}
+switch_connect(
+	switch => $a0,
+	start => 1,
+	machines => [$int_dns, $int_www, $ldap, $mail, $squid]
+);
 
 
 # Add every interface on every internal machine to the management VLAN.
