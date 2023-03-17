@@ -25,7 +25,7 @@ jobs:
         run: wget https://raw.githubusercontent.com/radams15/netkit-jh-build/master/core/bin/linfo
 
       - name: Generate graph
-        run: linfo --map=graph.png
+        run: bash linfo --map=graph.png
 
       - name: Release
         uses: "marvinpinto/action-automatic-releases@latest"
