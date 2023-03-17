@@ -471,6 +471,11 @@ my $a0 = Machine->new (
 	],
 	attachments => [
 		Attachment->new (lan => $internal_dmz_lan, eth => 0),
+		Attachment->new (vlan => $int_www_vlan, eth => 1),
+		Attachment->new (vlan => $int_dns_vlan, eth => 2),
+		Attachment->new (vlan => $ldap_vlan, eth => 3),
+		Attachment->new (vlan => $proxy_vlan, eth => 4),
+		Attachment->new (vlan => $mail_vlan, eth => 5),
 	],
 	switch => 1,
 	extra => "\nip link set dev sw0 address 08:00:4e:a0:a0:00\n"
@@ -503,7 +508,6 @@ my @internal_machines = (
 );
 
 
-
 # Add 3 finance machines.
 for my $staff_id (1..3) {
 	my $staff_machine = &make_staff('Finance', $staff_id, $finance_lan, '10.0.0.%d/24');
@@ -517,25 +521,24 @@ for my $staff_id (1..3) {
 }
 
 
-
-# Associate r1 with every vlan in the internal DMZ.
-for my $vlan ($int_www_vlan, $int_dns_vlan, $ldap_vlan, $proxy_vlan, $mail_vlan) { 
-	push @{$r1->{attachments}}, Attachment->new ( vlan => $vlan, eth=>1 );
-}
-
-
 # Connect all the internal DMZ devices to the switch
 switch_connect(
 	switch => $a0,
 	start => 1,
-	machines => [$int_dns, $int_www, $ldap, $mail, $squid]
+	machines => [
+		$int_www,
+		$int_dns,
+		$ldap,
+		$squid,
+		$mail,
+	]
 );
 
 
 # Add every interface on every internal machine to the management VLAN.
 for my $machine (@internal_machines) {
 	for my $interface (@{$machine->{interfaces}}) {
-		push @{$machine->{attachments}}, Attachment->new ( vlan => $management_vlan, eth=>$interface->{eth} );
+		push @{$machine->{attachments}}, Attachment->new ( vlan => $management_vlan, eth=>$interface->{eth});
 	}
 }
 

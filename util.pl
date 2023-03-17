@@ -36,7 +36,6 @@ sub dnat {
 	}
 }
 
-
 sub switch_connect {
 	my %args = @_;
 	my $switch = $args{switch};
