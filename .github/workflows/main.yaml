@@ -22,10 +22,14 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y graphviz curl
 
       - name: Get linfo
-        run: wget https://raw.githubusercontent.com/radams15/netkit-jh-build/master/core/bin/linfo
+        run: |
+          curl https://github.com/netkit-jh/netkit-jh-build/releases/download/2.0.0/netkit-core-2.0.0.tar.bz2 -o netkit-core.tar.bz2
+          sudo tar -xf netkit-core.tar.bz2 -C /opt/
+	  
+
 
       - name: Generate graph
-        run: bash linfo --map=graph.png
+        run: env NETKIT_HOME=/opt/netkit-jh bash /opt/netkit-jh/bin/linfo --map=graph.png
 
       - name: Release
         uses: "marvinpinto/action-automatic-releases@latest"
