@@ -25,8 +25,6 @@ my $internal_dmz_lan = Lan->new ('InternalDmz');
 my $finance_lan = Lan->new ('Finance');
 my $hr_lan = Lan->new ('Hr');
 
-my @a0_lans = map {Lan->new("a0$_");} (1..5);
-
 ####### VLANs #######
 
 my $management_vlan = Vlan->new (111);
@@ -205,13 +203,6 @@ my $int_dns = Machine->new (
 			via => '172.16.0.1',
 		),
 	],
-	attachments => [
-		Attachment->new (
-			lan => $a0_lans[1],
-			vlan => $int_dns_vlan, 
-			eth => 0
-		),
-	],
 	extra => "\nchmod +r /etc/dnsmasq_static_hosts.conf\nsystemctl start dnsmasq",
 );
 
@@ -227,13 +218,6 @@ my $int_www = Machine->new (
 		Route->new (
 			dst => 'default',
 			via => '172.16.0.1',
-		),
-	],
-	attachments => [
-		Attachment->new (
-			lan => $a0_lans[0],
-			vlan => $int_www_vlan, 
-			eth => 0
 		),
 	],
 	extra => "\na2enmod ssl\na2ensite default-ssl\nsystemctl start apache2",
@@ -253,13 +237,6 @@ my $ldap = Machine->new (
 			via => '172.16.0.1',
 		),
 	],
-	attachments => [
-		Attachment->new (
-			lan => $a0_lans[2],
-			vlan => $ldap_vlan, 
-			eth => 0
-		),
-	],
 	extra => "\nsystemctl start ncat-tcp-broker\@389\nsystemctl start ncat-udp-echo\@389",
 );
 
@@ -277,13 +254,6 @@ my $mail = Machine->new (
 			via => '172.16.0.1',
 		),
 	],
-	attachments => [
-		Attachment->new (
-			lan => $a0_lans[4],
-			vlan => $mail_vlan, 
-			eth => 0
-		),
-	],
 	extra => "\nsystemctl start ncat-tcp-broker\@25\nsystemctl start ncat-tcp-broker\@587\nsystemctl start ncat-tcp-broker\@993",
 );
 
@@ -299,13 +269,6 @@ my $squid = Machine->new (
 		Route->new (
 			dst => 'default',
 			via => '172.16.0.1',
-		),
-	],
-	attachments => [
-		Attachment->new (
-			lan => $a0_lans[3],
-			vlan => $proxy_vlan, 
-			eth => 0
 		),
 	],
 	extra => "\ntouch /var/log/squid/access.log\nchmod 777 /var/log/squid/access.log\nsystemctl start squid.service",
@@ -333,25 +296,6 @@ my $vpn = Machine->new (
 		),
 	],
 	extra => "\nsystemctl start ncat-tcp-broker\@1194",
-);
-
-# Switches
-
-my $a0 = Machine->new (
-	name => 'a0',
-	interfaces => [
-		Interface->new(eth=>0, mac=>"08:00:4e:a0:a0:00"),
-		map {
-			Interface->new(eth=>$_, mac=>"08:00:4e:a0:a0:0$_");
-		} (1..5)
-	],
-	attachments => [
-		Attachment->new (lan => $dmz_lan, eth => 0),
-		map {
-			Attachment->new (lan => $a0_lans[$_-1], eth => $_)
-		} (1..@a0_lans)		
-	],
-	switch => 1
 );
 
 # Routers
@@ -517,10 +461,25 @@ my $r2 = Machine->new (
 );
 
 
+my $a0 = Machine->new (
+	name => 'a0',
+	interfaces => [
+		Interface->new(eth=>0, mac=>"08:00:4e:a0:a0:00"),
+		map {
+			Interface->new(eth=>$_, mac=>"08:00:4e:a0:a0:0$_");
+		} (1..5),
+	],
+	attachments => [
+		Attachment->new (lan => $dmz_lan, eth => 0),
+	],
+	switch => 1
+);
+
 
 ####### Extra Configuration #######
 
 # Machines to dump to the output folder.
+
 
 my @external_machines = (
 	$internet,
@@ -542,6 +501,8 @@ my @internal_machines = (
 	$vpn,
 );
 
+
+
 # Add 3 finance machines.
 for my $staff_id (1..3) {
 	my $staff_machine = &make_staff('Finance', $staff_id, $finance_lan, '10.0.0.%d/24');
@@ -554,12 +515,28 @@ for my $staff_id (1..3) {
 	push @internal_machines, $staff_machine;
 }
 
+
+
 =pod
 # Associate r1 with every vlan in the internal DMZ.
 for my $vlan ($int_www_vlan, $int_dns_vlan, $ldap_vlan, $proxy_vlan, $mail_vlan) { 
 	push @{$r1->{attachments}}, Attachment->new ( vlan => $vlan, eth=>1 );
 }
 =cut
+
+
+# Connect all the internal DMZ devices to the switch
+my $a0_eth = 1;
+for($int_dns, $int_www, $ldap, $mail, $squid) {
+	my $name = Attachment::generate_lan_name($a0, $_); # Generate a unique lan name.
+	my $lan = Lan->new($name); # Make a new 2-device LAN.
+	
+	push @{$_->{attachments}}, Attachment->new (lan => $lan, eth => 0);
+	push @{$a0->{attachments}}, Attachment->new (lan => $lan, eth => $a0_eth);
+	
+	$a0_eth++;
+}
+
 
 # Add every interface on every internal machine to the management VLAN.
 for my $machine (@internal_machines) {
