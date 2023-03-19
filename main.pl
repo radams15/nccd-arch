@@ -5,6 +5,9 @@ use warnings;
 
 use Netkit;
 
+my $STAFF_PER_DEPARTMENT = 1;
+
+
 our $lab = Lab->new (
 	name => 'TestLab',
 	out_dir => 'res',
@@ -74,7 +77,7 @@ our $a0 = Machine->new (
 		} (1..5),
 	],
 	attachments => [
-		Attachment->new (lan => $internal_dmz_lan, eth => 0),
+		Attachment->new (lan  => $internal_dmz_lan, eth => 0),
 		Attachment->new (vlan => $int_www_vlan, eth => 1),
 		Attachment->new (vlan => $int_dns_vlan, eth => 2),
 		Attachment->new (vlan => $ldap_vlan, eth => 3),
@@ -82,7 +85,7 @@ our $a0 = Machine->new (
 		Attachment->new (vlan => $mail_vlan, eth => 5),
 	],
 	switch => 1,
-	extra => "\nip link set dev sw0 address 08:00:4e:a0:a0:00\n"
+	extra => "\nip link set dev sw0 address 08:00:4e:a0:a0:00\n",
 );
 
 
@@ -111,15 +114,14 @@ our @internal_machines = (
 	$vpn,
 );
 
-
 # Add 3 finance machines.
-for our $staff_id (1..3) {
+for our $staff_id (1..$STAFF_PER_DEPARTMENT) {
 	our $staff_machine = &make_staff('Finance', $staff_id, $finance_lan, '10.0.0.%d/24');
 	push @internal_machines, $staff_machine;
 }
 
 # Add 3 HR machines.
-for our $staff_id (1..3) {
+for our $staff_id (1..$STAFF_PER_DEPARTMENT) {
 	our $staff_machine = &make_staff('HR', $staff_id, $hr_lan, '10.0.1.%d/24');
 	push @internal_machines, $staff_machine;
 }
@@ -154,4 +156,6 @@ dnat (
 	ports => [25, 587, 993]
 );
 
-$lab->dump(@external_machines, @internal_machines);
+$lab->dump(
+	machines => [ @external_machines, @internal_machines ]
+);

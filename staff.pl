@@ -10,6 +10,9 @@ sub make_staff {
 	
 	my $last_ip_digit = 4 + $id;
 	
+	my $default_route = sprintf($lan_mask, 1);
+	$default_route =~ s/\/\d+$//g;
+	
 	Machine->new (
 		name => "Staff-$designation-$id",
 		interfaces => [
@@ -21,7 +24,7 @@ sub make_staff {
 		routes => [
 			Route->new (
 				dst => 'default',
-				via => sprintf($lan_mask, 1)
+				via => $default_route
 			),
 		],
 		attachments => [
@@ -34,7 +37,11 @@ sub make_staff {
 cat > /etc/resolv.conf << EOF
 nameserver 80.64.41.131
 search fido22.cyber.test
-EOF",
+EOF
+
+export http_proxy='172.16.0.5:3129'
+export https_proxy='172.16.0.5:3129'
+",
 	);
 }
 

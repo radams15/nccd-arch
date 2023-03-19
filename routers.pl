@@ -111,15 +111,25 @@ our $r1 = Machine->new (
 			proto => 'tcp',
 			dport => 443,
 			dst => ($int_www->ips)[0],
-			src => '10.0.0.0/20',
+			src => '192.168.0.3',
 			action => 'ACCEPT',
 		),
+		Rule->new (
+			chain => 'FORWARD',
+			stateful => 1,
+			proto => 'tcp',
+			dport => 80,
+			dst => ($int_www->ips)[0],
+			src => '192.168.0.3',
+			action => 'ACCEPT',
+		),
+		
 		Rule->new (
 			chain => 'FORWARD',
 			proto => 'udp',
 			dport => 53,
 			dst => ($int_dns->ips)[0],
-			src => '10.0.0.0/20',
+			src => '192.168.0.3',
 			action => 'ACCEPT',
 		),
 		
@@ -129,7 +139,7 @@ our $r1 = Machine->new (
 			proto => 'tcp',
 			dport => 389,
 			dst => ($ldap->ips)[0],
-			src => '10.0.0.0/20',
+			src => '192.168.0.3',
 			action => 'ACCEPT',
 		),
 		Rule->new (
@@ -137,7 +147,7 @@ our $r1 = Machine->new (
 			proto => 'udp',
 			dport => 389,
 			dst => ($ldap->ips)[0],
-			src => '10.0.0.0/20',
+			src => '192.168.0.3',
 			action => 'ACCEPT',
 		),
 		
@@ -145,9 +155,9 @@ our $r1 = Machine->new (
 			chain => 'FORWARD',
 			stateful => 1,
 			proto => 'tcp',
-			dport => 3128,
+			dport => 3129,
 			dst => ($squid->ips)[0],
-			src => '10.0.0.0/20',
+			src => '192.168.0.3',
 			action => 'ACCEPT',
 		),
 		
@@ -157,7 +167,7 @@ our $r1 = Machine->new (
 			proto => 'tcp',
 			dport => 25,
 			dst => ($mail->ips)[0],
-			src => '10.0.0.0/20',
+			in => 'eth0',
 			action => 'ACCEPT',
 		),
 		Rule->new (
@@ -166,7 +176,7 @@ our $r1 = Machine->new (
 			proto => 'tcp',
 			dport => 587,
 			dst => ($mail->ips)[0],
-			src => '10.0.0.0/20',
+			in => 'eth0',
 			action => 'ACCEPT',
 		),
 		Rule->new (
@@ -175,7 +185,7 @@ our $r1 = Machine->new (
 			proto => 'tcp',
 			dport => 993,
 			dst => ($mail->ips)[0],
-			src => 'eth0',
+			in => 'eth0',
 			action => 'ACCEPT',
 		),
 	],
@@ -224,6 +234,28 @@ our $r2 = Machine->new (
 	rules => [
 		Rule->new (
 			policy => 'FORWARD DROP',
+		),
+		
+		# Allow forwarding to internal dmz from eth1 and eth2
+		Rule->new (
+			chain => 'FORWARD',
+			stateful => 1,
+			in => 'eth1',
+			dst => '172.16.0.0/24',
+			action => 'ACCEPT',
+		),
+		Rule->new (
+			chain => 'FORWARD',
+			stateful => 1,
+			in => 'eth2',
+			dst => '172.16.0.0/24',
+			action => 'ACCEPT',
+		),
+		Rule->new (
+			table => 'nat',
+			chain => 'POSTROUTING',
+			to_src => '192.168.0.3',
+			action => 'SNAT',
 		),
 	],
 );
