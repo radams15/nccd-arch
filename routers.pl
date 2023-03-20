@@ -107,25 +107,6 @@ our $r1 = Machine->new (
 		
 		Rule->new (
 			chain => 'FORWARD',
-			stateful => 1,
-			proto => 'tcp',
-			dport => 443,
-			dst => ($int_www->ips)[0],
-			src => '192.168.0.3',
-			action => 'ACCEPT',
-		),
-		Rule->new (
-			chain => 'FORWARD',
-			stateful => 1,
-			proto => 'tcp',
-			dport => 80,
-			dst => ($int_www->ips)[0],
-			src => '192.168.0.3',
-			action => 'ACCEPT',
-		),
-		
-		Rule->new (
-			chain => 'FORWARD',
 			proto => 'udp',
 			dport => 53,
 			dst => ($int_dns->ips)[0],
