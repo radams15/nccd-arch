@@ -12,6 +12,7 @@ our (
     $ext_office_lan,
     $ext_dns_lan,
     $dmz_lan,
+    $office_lan,
     $internal_dmz_lan,
     $finance_lan,
     $hr_lan,
@@ -52,7 +53,7 @@ our $gw = Machine->new (
 	],
 	attachments => [
 		Attachment->new (
-			lan => $ext_www_lan,
+			lan => $office_lan,
 			eth => 0
 		),
 		Attachment->new (
@@ -92,7 +93,7 @@ our $r1 = Machine->new (
 	],
 	attachments => [
 		Attachment->new (
-			lan => $dmz_lan,
+			lan => $office_lan,
 			eth => 0
 		),
 		Attachment->new (
@@ -103,6 +104,25 @@ our $r1 = Machine->new (
 	rules => [
 		Rule->new (
 			policy => 'FORWARD DROP',
+		),
+		
+		Rule->new (
+			chain => 'FORWARD',
+			stateful => 1,
+			proto => 'tcp',
+			dport => 443,
+			dst => ($int_www->ips)[0],
+			src => '192.168.0.3',
+			action => 'ACCEPT',
+		),
+		Rule->new (
+			chain => 'FORWARD',
+			stateful => 1,
+			proto => 'tcp',
+			dport => 80,
+			dst => ($int_www->ips)[0],
+			src => '192.168.0.3',
+			action => 'ACCEPT',
 		),
 		
 		Rule->new (
@@ -200,7 +220,7 @@ our $r2 = Machine->new (
 	],
 	attachments => [
 		Attachment->new (
-			lan => $dmz_lan,
+			lan => $office_lan,
 			eth => 0
 		),
 		Attachment->new (

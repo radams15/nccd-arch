@@ -20,6 +20,7 @@ our $ext_www_lan = Lan->new ('ExtWWW');
 our $ext_office_lan = Lan->new ('ExtOffice');
 our $ext_dns_lan = Lan->new ('ExtDns');
 our $dmz_lan = Lan->new ('Dmz');
+our $office_lan = Lan->new ('Office');
 our $internal_dmz_lan = Lan->new ('InternalDmz');
 our $finance_lan = Lan->new ('Finance');
 our $hr_lan = Lan->new ('Hr');
