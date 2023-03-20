@@ -8,7 +8,7 @@ use Netkit;
 my $STAFF_PER_DEPARTMENT = 1;
 
 
-our $lab = Lab->new (
+my $lab = Lab->new (
 	name => 'TestLab',
 	out_dir => 'res',
 	data_dir => 'data',
@@ -94,14 +94,14 @@ our $a0 = Machine->new (
 
 # Machines to dump to the output folder.
 
-our @external_machines = (
+my @external_machines = (
 	$internet,
 	$ext_office,
 	$ext_dns,
 	$ext_www,
 );
 
-our @internal_machines = (
+my @internal_machines = (
 	$gw,
 	$a0,
 	$r1,
@@ -115,14 +115,14 @@ our @internal_machines = (
 );
 
 # Add 3 finance machines.
-for our $staff_id (1..$STAFF_PER_DEPARTMENT) {
-	our $staff_machine = &make_staff('Finance', $staff_id, $finance_lan, '10.0.0.%d/24');
+for my $staff_id (1..$STAFF_PER_DEPARTMENT) {
+	my $staff_machine = &make_staff('Finance', $staff_id, $finance_lan, '10.0.0.%d/24');
 	push @internal_machines, $staff_machine;
 }
 
 # Add 3 HR machines.
-for our $staff_id (1..$STAFF_PER_DEPARTMENT) {
-	our $staff_machine = &make_staff('HR', $staff_id, $hr_lan, '10.0.1.%d/24');
+for my $staff_id (1..$STAFF_PER_DEPARTMENT) {
+	my $staff_machine = &make_staff('HR', $staff_id, $hr_lan, '10.0.1.%d/24');
 	push @internal_machines, $staff_machine;
 }
 
@@ -142,10 +142,22 @@ switch_connect(
 
 
 # Add every interface on every internal machine to the management VLAN.
-for our $machine (@internal_machines) {
-	for our $interface (@{$machine->{interfaces}}) {
-		push @{$machine->{attachments}}, Attachment->new ( vlan => $management_vlan, eth=>$interface->{eth});
+for my $machine (@internal_machines) {
+	for my $interface (@{$machine->{interfaces}}) {
+		push @{$machine->{attachments}}, Attachment->new (
+			vlan => $management_vlan,
+			eth=>$interface->{eth}
+		);
 	}
+}
+
+# Allow ICMP packets to be forwarded by all machines (for testing, remove for submission)
+for my $machine (@internal_machines, @external_machines) {
+	push @{$machine->{rules}}, Rule->new (
+		chain => 'FORWARD',
+		proto => 'icmp',
+		action => 'ACCEPT',
+	);
 }
 
 
