@@ -10,7 +10,7 @@ require './util.pl';
 our $ext_www_lan;
 our $ext_office_lan;
 our $ext_dns_lan;
-our $dmz_lan;
+our $internet_connection_lan;
 
 # External
 
@@ -48,7 +48,7 @@ our $internet = Machine->new (
 			eth => 2
 		),
 		Attachment->new (
-			lan => $dmz_lan,
+			lan => $internet_connection_lan,
 			eth => 3
 		),
 	],
