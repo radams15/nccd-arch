@@ -42,8 +42,7 @@ EOF
 cat >> /root/.bashrc << EOF
 export http_proxy='172.16.0.5:3129'
 export https_proxy='172.16.0.5:3129'
-EOF
-",
+EOF",
 	);
 }
 
