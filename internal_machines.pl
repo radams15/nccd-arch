@@ -15,6 +15,7 @@ our (
     $internal_dmz_lan,
     $finance_lan,
     $hr_lan,
+	$vpn_lan,
 );
 
 
@@ -111,18 +112,18 @@ our $vpn = Machine->new (
 	interfaces => [
 		Interface->new (
 			eth => 0,
-			ip => '10.0.0.2/20',
+			ip => '10.0.2.2/20',
 		),
 	],
 	routes => [
 		Route->new (
 			dst => 'default',
-			via => '10.0.0.1',
+			via => '10.0.2.1',
 		),
 	],
 	attachments => [
 		Attachment->new (
-			lan => $finance_lan,
+			lan => $vpn_lan,
 			eth => 0
 		),
 	],

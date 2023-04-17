@@ -16,6 +16,10 @@ our (
     $internal_dmz_lan,
     $finance_lan,
     $hr_lan,
+	$vpn_lan,
+	$staff_vlan,
+	$all_vlans,
+	$dmz_vlan,
 );
 
 # Machine imports
@@ -258,15 +262,23 @@ our $r2 = Machine->new (
 	attachments => [
 		Attachment->new (
 			lan => $office_lan,
-			eth => 0
+			eth => 0,
+			vlan => $all_vlans,
 		),
 		Attachment->new (
 			lan => $finance_lan,
-			eth => 1
+			eth => 1,
+			vlan => $staff_vlan, untagged => 1,
 		),
 		Attachment->new (
 			lan => $hr_lan,
-			eth => 2
+			eth => 2,
+			vlan => $staff_vlan, untagged => 1,
+		),
+		Attachment->new (
+			lan => $vpn_lan,
+			eth => 3,
+			vlan => $staff_vlan, untagged => 1,
 		),
 	],
 	rules => [
@@ -278,14 +290,7 @@ our $r2 = Machine->new (
 		Rule->new (
 			chain => 'FORWARD',
 			stateful => 1,
-			in => 'eth1',
-			dst => '172.16.0.0/24',
-			action => 'ACCEPT',
-		),
-		Rule->new (
-			chain => 'FORWARD',
-			stateful => 1,
-			in => 'eth2',
+			in => 'eth1,eth2,eth3',
 			dst => '172.16.0.0/24',
 			action => 'ACCEPT',
 		),
