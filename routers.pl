@@ -219,6 +219,10 @@ our $hr_router = Machine->new (
 			action => 'SNAT',
 		),
 	],
+	extra => "\
+touch /var/lib/dhcp/dhcpd.leases # needed for dhcpd to work
+dhcpd
+	",
 );
 
 our $finance_router = Machine->new (
@@ -253,6 +257,10 @@ our $finance_router = Machine->new (
 			action => 'SNAT',
 		),
 	],
+	extra => "\
+touch /var/lib/dhcp/dhcpd.leases # needed for dhcpd to work
+dhcpd
+	",
 );
 
 1;

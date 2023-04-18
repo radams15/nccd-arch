@@ -18,7 +18,7 @@ sub make_staff {
 		interfaces => [
 			Interface->new (
 				eth => 0,
-				ip => sprintf($lan_mask, $last_ip_digit),
+				#ip => sprintf($lan_mask, $last_ip_digit),
 			),
 		],
 		routes => [
@@ -42,7 +42,9 @@ EOF
 cat >> /root/.bashrc << EOF
 export http_proxy='172.26.0.2:3129'
 export https_proxy='172.26.0.2:3129'
-EOF",
+EOF
+
+dhclient&",
 	);
 }
 

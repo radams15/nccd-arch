@@ -264,10 +264,7 @@ close HOSTS;
 
 $lab->dump(
 	machines => [
-		#@external_machines,
+		@external_machines,
 		@internal_machines,
 	],
-	deps => {
-		
-	}
 );
