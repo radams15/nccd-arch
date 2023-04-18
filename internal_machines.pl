@@ -16,6 +16,10 @@ our (
     $finance_lan,
     $hr_lan,
 	$vpn_lan,
+	
+	$dmz_router,
+    $internal_router,
+    $internal_dmz_router,
 );
 
 
@@ -26,13 +30,13 @@ our $int_dns = Machine->new (
 	interfaces => [
 		Interface->new (
 			eth => 0,
-			ip => '172.16.0.3/24',
+			ip => '172.26.0.4/24',
 		),
 	],
 	routes => [
 		Route->new (
 			dst => 'default',
-			via => '172.16.0.1',
+			via => $internal_router->ips->{1}, # internal_router eth1
 		),
 	],
 	extra => "\nchmod +r /etc/dnsmasq_static_hosts.conf\nsystemctl start dnsmasq",
@@ -43,13 +47,13 @@ our $int_www = Machine->new (
 	interfaces => [
 		Interface->new (
 			eth => 0,
-			ip => '172.16.0.2/24',
+			ip => '172.26.0.3/24',
 		),
 	],
 	routes => [
 		Route->new (
 			dst => 'default',
-			via => '172.16.0.1',
+			via => $internal_router->ips->{1}, # internal_router eth1
 		),
 	],
 	extra => "\na2enmod ssl\na2ensite default-ssl\nsystemctl start apache2",
@@ -60,13 +64,13 @@ our $ldap = Machine->new (
 	interfaces => [
 		Interface->new (
 			eth => 0,
-			ip => '172.16.0.4/24',
+			ip => '172.36.0.2/24',
 		),
 	],
 	routes => [
 		Route->new (
 			dst => 'default',
-			via => '172.16.0.1',
+			via => $internal_dmz_router->ips->{1}, # internal_router eth1,
 		),
 	],
 	extra => "\nsystemctl start ncat-tcp-broker\@389\nsystemctl start ncat-udp-echo\@389",
@@ -77,13 +81,13 @@ our $mail = Machine->new (
 	interfaces => [
 		Interface->new (
 			eth => 0,
-			ip => '172.16.0.6/24',
+			ip => '172.16.0.2/24',
 		),
 	],
 	routes => [
 		Route->new (
 			dst => 'default',
-			via => '172.16.0.1',
+			via => $dmz_router->ips->{2}, # dmz_router eth2
 		),
 	],
 	extra => "\nsystemctl start ncat-tcp-broker\@25\nsystemctl start ncat-tcp-broker\@587\nsystemctl start ncat-tcp-broker\@993",
@@ -94,13 +98,13 @@ our $squid = Machine->new (
 	interfaces => [
 		Interface->new (
 			eth => 0,
-			ip => '172.16.0.5/24',
+			ip => '172.26.0.2/24',
 		),
 	],
 	routes => [
 		Route->new (
 			dst => 'default',
-			via => '172.16.0.1',
+			via => $internal_router->ips->{1}, # internal_router eth1
 		),
 	],
 	extra => "\ntouch /var/log/squid/access.log\nchmod 777 /var/log/squid/access.log\nsystemctl start squid.service",
@@ -112,19 +116,13 @@ our $vpn = Machine->new (
 	interfaces => [
 		Interface->new (
 			eth => 0,
-			ip => '10.0.2.2/20',
+			ip => '10.10.0.3/24',
 		),
 	],
 	routes => [
 		Route->new (
 			dst => 'default',
-			via => '10.0.2.1',
-		),
-	],
-	attachments => [
-		Attachment->new (
-			lan => $vpn_lan,
-			eth => 0
+			via => $internal_router->ips->{2}, # internal_router eth2,
 		),
 	],
 	extra => "\nsystemctl start ncat-tcp-broker\@1194",

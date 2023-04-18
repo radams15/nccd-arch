@@ -12,98 +12,52 @@ our (
     $ext_office_lan,
     $ext_dns_lan,
     $internet_connection_lan,
-    $office_lan,
+    $dmz_lan,
+    $gateway_lan,
+    $internal_lan,
     $internal_dmz_lan,
-    $finance_lan,
+    $staff_lan,
+    $extranet_lan,
     $hr_lan,
-	$vpn_lan,
-	$staff_vlan,
-	$all_vlans,
-	$dmz_vlan,
+    $finance_lan,
 );
-
-# Machine imports
-
-our (
-	$int_www,
-	$int_dns,
-	$ldap,
-	$squid,
-	$mail,
-);
-
 
 our $gw = Machine->new (
 	name => 'gw',
 	interfaces => [
 		Interface->new (
 			eth => 0,
-			ip => '192.168.0.1/24',
+			ip => '80.64.157.200',
 		),
 		Interface->new (
 			eth => 1,
-			ip => '80.64.157.200',
+			ip => '192.168.0.1/24',
 		),
 	],
 	routes => [
 		Route->new (
 			dst => 'default',
-			dev => 'eth1',
-		),
-		Route->new (
-			dst => '172.16.0.0/24',
-			via => '192.168.0.2',
-		),
-		Route->new (
-			dst => '10.0.0.0/20',
-			via => '192.168.0.3',
-		),
-		Route->new (
-			dst => '201.224.19.7',
-			via => '80.64.157.254',
-		),
-		Route->new (
-			dst => '8.8.8.8',
-			via => '80.64.157.254',
-		),
-		Route->new (
-			dst => '22.39.224.18',
-			via => '80.64.157.254',
+			dev => 'eth0', # Unsure if works
 		),
 	],
 	attachments => [
 		Attachment->new (
-			lan => $office_lan,
+			lan => $internet_connection_lan,
 			eth => 0,
 		),
 		Attachment->new (
-			lan => $internet_connection_lan,
+			lan => $gateway_lan,
 			eth => 1,
 		),
 	],
 	rules => [
-		Rule->new (
-			policy => 'FORWARD DROP',
-		),
-		Rule->new (
-			table => 'nat',
-			chain => 'POSTROUTING',
-			to_src => '80.64.157.200', # SNAT on internet gateway interface
-			action => 'SNAT',
-		),
-		Rule->new (
-			chain => 'FORWARD',
-			stateful => 1,
-			in => 'eth0', # Allow outgoing connections
-			proto => 'tcp',
-			action => 'ACCEPT',
-		),
-	],	
+	
+	],
 );
 
 
-our $r1 = Machine->new (
-	name => 'r1',
+our $dmz_router = Machine->new (
+	name => 'DmzRouter',
 	interfaces => [
 		Interface->new (
 			eth => 0,
@@ -111,195 +65,183 @@ our $r1 = Machine->new (
 		),
 		Interface->new (
 			eth => 1,
+			ip => '192.168.1.1/24',
+		),
+		Interface->new (
+			eth => 2,
 			ip => '172.16.0.1/24',
 		),
 	],
 	routes => [
 		Route->new (
 			dst => 'default',
-			via => '192.168.0.1'
+			via => $gw->ips->{1},
 		),
 		Route->new (
-			dst => '10.0.0.0/20',
-			via => '192.168.0.3'
+			dst => '172.26.0.0/24',
+			via => '192.168.1.2',
+			dev => 'eth1',
+		),
+		Route->new (
+			dst => '10.10.0.0/24',
+			via => '192.168.1.2',
+			dev => 'eth1',
+		),
+		Route->new (
+			dst => '172.36.0.0/24',
+			via => '192.168.1.2',
+			dev => 'eth1',
 		),
 	],
 	attachments => [
 		Attachment->new (
-			lan => $office_lan,
-			eth => 0
+			lan => $gateway_lan,
+			eth => 0,
 		),
 		Attachment->new (
-			lan => $internal_dmz_lan,
-			eth => 1
+			lan => $internal_lan,
+			eth => 1,
+		),
+		Attachment->new (
+			lan => $dmz_lan,
+			eth => 2,
 		),
 	],
 	rules => [
-		Rule->new (
-			policy => 'FORWARD DROP',
-		),
-		
-		Rule->new (
-			chain => 'FORWARD',
-			stateful => 1,
-			proto => 'tcp',
-			dport => 443,
-			dst => ($int_www->ips)[0],
-			src => '192.168.0.3',
-			action => 'ACCEPT',
-		),
-		Rule->new (
-			chain => 'FORWARD',
-			stateful => 1,
-			proto => 'tcp',
-			dport => 80,
-			dst => ($int_www->ips)[0],
-			src => '192.168.0.3',
-			action => 'ACCEPT',
-		),
-		
-		Rule->new (
-			chain => 'FORWARD',
-			proto => 'udp',
-			dport => 53,
-			dst => ($int_dns->ips)[0],
-			src => '192.168.0.3',
-			action => 'ACCEPT',
-		),
-		
-		Rule->new (
-			chain => 'FORWARD',
-			stateful => 1,
-			proto => 'tcp',
-			dport => 389,
-			dst => ($ldap->ips)[0],
-			src => '192.168.0.3',
-			action => 'ACCEPT',
-		),
-		Rule->new (
-			chain => 'FORWARD',
-			proto => 'udp',
-			dport => 389,
-			dst => ($ldap->ips)[0],
-			src => '192.168.0.3',
-			action => 'ACCEPT',
-		),
-		
-		Rule->new (
-			chain => 'FORWARD',
-			stateful => 1,
-			proto => 'tcp',
-			dport => 3129,
-			dst => ($squid->ips)[0],
-			src => '192.168.0.3',
-			action => 'ACCEPT',
-		),
-		
-		Rule->new (
-			chain => 'FORWARD',
-			stateful => 1,
-			proto => 'tcp',
-			dport => 25,
-			dst => ($mail->ips)[0],
-			in => 'eth0',
-			action => 'ACCEPT',
-		),
-		Rule->new (
-			chain => 'FORWARD',
-			stateful => 1,
-			proto => 'tcp',
-			dport => 587,
-			dst => ($mail->ips)[0],
-			in => 'eth0',
-			action => 'ACCEPT',
-		),
-		Rule->new (
-			chain => 'FORWARD',
-			stateful => 1,
-			proto => 'tcp',
-			dport => 993,
-			dst => ($mail->ips)[0],
-			in => 'eth0',
-			action => 'ACCEPT',
-		),
-
-		Rule->new (
-			chain => 'FORWARD',
-			stateful => 1,
-			in => 'eth1', # Allow outgoing connections from eth1 & eth2
-			proto => 'tcp',
-			action => 'ACCEPT',
-		),
+	
 	],
 );
 
-our $r2 = Machine->new (
-	name => 'r2',
+our $internal_router = Machine->new (
+	name => 'InternalRouter',
 	interfaces => [
 		Interface->new (
 			eth => 0,
-			ip => '192.168.0.3/24',
+			ip => '192.168.1.2/24',
 		),
 		Interface->new (
 			eth => 1,
-			ip => '10.0.0.1/24',
+			ip => '172.26.0.1/24',
 		),
 		Interface->new (
 			eth => 2,
-			ip => '10.0.1.1/24',
+			ip => '10.10.0.1/24',
 		),
 	],
 	routes => [
 		Route->new (
 			dst => 'default',
-			via => '192.168.0.1'
+			via => $dmz_router->ips->{1}, # dmz_router eth1
 		),
 		Route->new (
-			dst => '172.16.0.0/24',
-			via => '192.168.0.2'
+			dst => '172.36.0.0/24', # Internal DMZ via InternalDmzRouter
+			via => '10.10.0.2',
+			dev => 'eth2',
 		),
 	],
 	attachments => [
 		Attachment->new (
-			lan => $office_lan,
+			lan => $internal_lan,
 			eth => 0,
-			vlan => $all_vlans,
 		),
 		Attachment->new (
-			lan => $finance_lan,
+			lan => $extranet_lan,
 			eth => 1,
-			vlan => $staff_vlan, untagged => 1,
 		),
 		Attachment->new (
-			lan => $hr_lan,
+			lan => $staff_lan,
 			eth => 2,
-			vlan => $staff_vlan, untagged => 1,
-		),
-		Attachment->new (
-			lan => $vpn_lan,
-			eth => 3,
-			vlan => $staff_vlan, untagged => 1,
 		),
 	],
 	rules => [
-		Rule->new (
-			policy => 'FORWARD DROP',
+	
+	],
+);
+
+our $internal_dmz_router = Machine->new (
+	name => 'InternalDmzRouter',
+	interfaces => [
+		Interface->new (
+			eth => 0,
+			ip => '10.10.0.2/24',
 		),
-		
-		# Allow forwarding to internal dmz from eth1 and eth2
-		Rule->new (
-			chain => 'FORWARD',
-			stateful => 1,
-			in => 'eth1,eth2,eth3',
-			dst => '172.16.0.0/24',
-			action => 'ACCEPT',
+		Interface->new (
+			eth => 1,
+			ip => '172.36.0.1/24',
 		),
-		Rule->new (
-			table => 'nat',
-			chain => 'POSTROUTING',
-			to_src => '192.168.0.3',
-			action => 'SNAT',
+	],
+	routes => [
+		Route->new (
+			dst => 'default',
+			via => $internal_router->ips->{2}, # internal_router eth0
 		),
+	],
+	attachments => [ # eth0 -> staff_switch
+		Attachment->new (
+			lan => $internal_dmz_lan,
+			eth => 1,
+		),
+	],
+	rules => [
+	
+	],
+);
+
+our $hr_router = Machine->new (
+	name => 'HrRouter',
+	interfaces => [
+		Interface->new (
+			eth => 0,
+			ip => '10.10.0.4/24',
+		),
+		Interface->new (
+			eth => 1,
+			ip => '10.20.0.1/16',
+		),
+	],
+	routes => [
+		Route->new (
+			dst => 'default',
+			via => $internal_router->ips->{2}, # internal_router eth0
+		),
+	],
+	attachments => [ # eth0 -> staff_switch
+		Attachment->new (
+			lan => $hr_lan,
+			eth => 1,
+		),
+	],
+	rules => [
+
+	],
+);
+
+our $finance_router = Machine->new (
+	name => 'FinanceRouter',
+	interfaces => [
+		Interface->new (
+			eth => 0,
+			ip => '10.10.0.5/24',
+		),
+		Interface->new (
+			eth => 1,
+			ip => '10.30.0.1/16',
+		),
+	],
+	routes => [
+		Route->new (
+			dst => 'default',
+			via => $internal_router->ips->{2}, # internal_router eth0
+		),
+	],
+	attachments => [ # eth0 -> staff_switch
+		Attachment->new (
+			lan => $finance_lan,
+			eth => 1,
+		),
+	],
+	rules => [
+
 	],
 );
 
