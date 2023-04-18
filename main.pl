@@ -11,7 +11,7 @@ my $STAFF_PER_DEPARTMENT = 1;
 
 my $lab = Lab->new (
 	name => 'TestLab',
-	version => 0.7,
+	version => 0.9,
 	author => 'Rhys Adams',
 	out_dir => 'res',
 	data_dir => 'data',
