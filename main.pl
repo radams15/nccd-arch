@@ -150,6 +150,14 @@ my @switches = (
 	$internal_dmz_switch,
 );
 
+my @routers = (
+	$dmz_router,
+    $internal_router,
+    $internal_dmz_router,
+    $hr_router,
+    $finance_router,
+);
+
 my @external_machines = (
 	$internet,
 	$ext_office,
@@ -159,11 +167,7 @@ my @external_machines = (
 
 my @internal_machines = (
 	$gw,
-	$dmz_router,
-    $internal_router,
-    $internal_dmz_router,
-    $hr_router,
-    $finance_router,
+	@routers,
 	@switches,
 	$int_dns,
 	$int_www,
