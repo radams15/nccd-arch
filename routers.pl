@@ -212,7 +212,12 @@ our $hr_router = Machine->new (
 		),
 	],
 	rules => [
-
+		Rule->new (
+			table => 'nat',
+			chain => 'POSTROUTING',
+			to_src => '10.10.0.4',
+			action => 'SNAT',
+		),
 	],
 );
 
@@ -241,7 +246,12 @@ our $finance_router = Machine->new (
 		),
 	],
 	rules => [
-
+		Rule->new (
+			table => 'nat',
+			chain => 'POSTROUTING',
+			to_src => '10.10.0.5',
+			action => 'SNAT',
+		),
 	],
 );
 
