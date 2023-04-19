@@ -220,8 +220,7 @@ our $hr_router = Machine->new (
 		),
 	],
 	extra => "\
-touch /var/lib/dhcp/dhcpd.leases # needed for dhcpd to work
-dhcpd
+systemctl start isc-dhcp-server
 	",
 );
 
@@ -258,8 +257,7 @@ our $finance_router = Machine->new (
 		),
 	],
 	extra => "\
-touch /var/lib/dhcp/dhcpd.leases # needed for dhcpd to work
-dhcpd
+systemctl start isc-dhcp-server
 	",
 );
 

@@ -177,17 +177,21 @@ my @internal_machines = (
 	$vpn,
 );
 
-my @staff_machines = ();
+my %deps;
+
+my @staff_machines;
 
 # Add 3 HR machines.
 for my $staff_id (1..$STAFF_PER_DEPARTMENT) {
 	my $staff_machine = &make_staff('HR', $staff_id, $hr_lan, '10.20.0.%d/24');
+	$deps{$staff_machine->{name}} = [$hr_router->{name}];
 	push @staff_machines, $staff_machine;
 }
 
 # Add 3 finance machines.
 for my $staff_id (1..$STAFF_PER_DEPARTMENT) {
 	my $staff_machine = &make_staff('Finance', $staff_id, $finance_lan, '10.30.0.%d/24');
+	$deps{$staff_machine->{name}} = [$finance_router->{name}];
 	push @staff_machines, $staff_machine;
 }
 
@@ -267,4 +271,5 @@ $lab->dump(
 		@external_machines,
 		@internal_machines,
 	],
+	deps => \%deps,
 );
