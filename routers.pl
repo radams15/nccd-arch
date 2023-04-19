@@ -33,6 +33,10 @@ our $gw = Machine->new (
 			eth => 1,
 			ip => '192.168.0.1/24',
 		),
+		Interface->new (
+			eth => 2,
+			ip => '192.168.2.6/24',
+		),
 	],
 	routes => [
 		Route->new (
@@ -70,6 +74,10 @@ our $dmz_router = Machine->new (
 		Interface->new (
 			eth => 2,
 			ip => '172.16.0.1/24',
+		),
+		Interface->new (
+			eth => 3,
+			ip => '192.168.2.7/24',
 		),
 	],
 	routes => [
@@ -127,6 +135,10 @@ our $internal_router = Machine->new (
 			eth => 2,
 			ip => '10.10.0.1/24',
 		),
+		Interface->new (
+			eth => 3,
+			ip => '192.168.2.2/24',
+		),
 	],
 	routes => [
 		Route->new (
@@ -169,6 +181,10 @@ our $internal_dmz_router = Machine->new (
 			eth => 1,
 			ip => '172.36.0.1/24',
 		),
+		Interface->new (
+			eth => 2,
+			ip => '192.168.2.3/24',
+		),
 	],
 	routes => [
 		Route->new (
@@ -197,6 +213,10 @@ our $hr_router = Machine->new (
 		Interface->new (
 			eth => 1,
 			ip => '10.20.0.1/16',
+		),
+		Interface->new (
+			eth => 2,
+			ip => '192.168.2.5/24',
 		),
 	],
 	routes => [
@@ -235,6 +255,10 @@ our $finance_router = Machine->new (
 			eth => 1,
 			ip => '10.30.0.1/16',
 		),
+		Interface->new (
+			eth => 2,
+			ip => '192.168.2.4/24',
+		),
 	],
 	routes => [
 		Route->new (
@@ -259,6 +283,32 @@ our $finance_router = Machine->new (
 	extra => "\
 systemctl start isc-dhcp-server
 	",
+);
+
+our $management_router = Machine->new (
+	name => 'ManagementRouter',
+	interfaces => [
+		Interface->new (
+			eth => 0,
+			ip => '10.1.0.1/16',
+		),
+		Interface->new (
+			eth => 2,
+			ip => '192.168.2.1/24',
+		),
+	],
+	routes => [
+		Route->new (
+			dst => 'default',
+			via => $internal_router->ips->{3}, # internal_router eth3
+		),
+	],
+	attachments => [ # eth0 -> staff_switch
+		Attachment->new (
+			lan => $finance_lan,
+			eth => 1,
+		),
+	],
 );
 
 1;

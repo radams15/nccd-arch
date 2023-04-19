@@ -48,4 +48,19 @@ dhclient&",
 	);
 }
 
+our $management_a = Machine->new (
+	name => 'ManagementA',
+	interfaces => [
+		Interface->new (
+			eth => 0,
+			ip => '10.1.0.2/16',
+		),
+	],
+	routes => [
+		Route->new (
+			dst => 'default',
+			via => '10.1.0.1', # internal_router eth0
+		),
+	],
+);
 1;

@@ -35,13 +35,15 @@ our $staff_lan = Lan->new ('STAFF');
 our $finance_lan = Lan->new ('FINANCE');
 our $hr_lan = Lan->new ('HR');
 our $vpn_lan = Lan->new ('VPN');
+our $management_lan = Lan->new ('MANAGEMENT');
+our $external_management_lan = Lan->new ('EXT_MANAGEMENT');
 
 ####### VLANs #######
 
 our $management_vlan = Vlan->new (4000);
 our $dmz_vlan = Vlan->new(2000);
 our $staff_vlan = Vlan->new (1000);
-our $all_vlans = Vlan->new ('2-4095');
+our $all_vlans = Vlan->new ('2-4094');
 
 ####### Machines #######
 
@@ -60,6 +62,7 @@ our (
     $internal_dmz_router,
     $hr_router,
     $finance_router,
+    $management_router,
 );
 
 # External
@@ -77,7 +80,8 @@ our (
     $ldap,
     $mail,
     $squid,
-    $vpn
+    $vpn,
+    $management_a,
 );
 
 # Switches
@@ -138,6 +142,34 @@ our $internal_dmz_switch = Machine->new (
 	vlan_filtering => 0,
 );
 
+our $internal_management_switch = Machine->new (
+	name => 'InternalManagementSwitch',
+	interfaces => [
+		map {
+			Interface->new (eth=>$_);
+		} (0..1),
+	],
+	attachments => [
+		Attachment->new (lan  => $management_lan, eth => 0)
+	],
+	switch => 1,
+	vlan_filtering => 0,
+);
+
+our $external_management_switch = Machine->new (
+	name => 'ExternalManagementSwitch',
+	interfaces => [
+		map {
+			Interface->new (eth=>$_);
+		} (0..6),
+	],
+	attachments => [
+		Attachment->new (lan  => $external_management_lan, eth => 0)
+	],
+	switch => 1,
+	vlan_filtering => 0,
+);
+
 ####### Extra Configuration #######
 
 
@@ -148,6 +180,8 @@ my @switches = (
 	$dmz_switch,
 	$extranet_switch,
 	$internal_dmz_switch,
+	$internal_management_switch,
+	$external_management_switch,
 );
 
 my @routers = (
@@ -156,6 +190,7 @@ my @routers = (
     $internal_dmz_router,
     $hr_router,
     $finance_router,
+    $management_router,
 );
 
 my @external_machines = (
@@ -195,7 +230,11 @@ for my $staff_id (1..$STAFF_PER_DEPARTMENT) {
 	push @staff_machines, $staff_machine;
 }
 
-push @internal_machines, @staff_machines;
+my @management_machines = (
+	$management_a,
+);
+
+push @internal_machines, (@staff_machines, @management_machines);
 
 # Connect all the internal staff devices to the switch
 switch_connect(
@@ -232,6 +271,27 @@ switch_connect(
 	start => 1,
 	machines => [
 		$ldap,
+	]
+);
+
+switch_connect(
+	switch => $internal_management_switch,
+	start => 1,
+	machines => [
+		$management_a,
+	]
+);
+
+switch_connect(
+	switch => $external_management_switch,
+	start => 1,
+	machines => [
+		[$internal_router => 3],
+		[$internal_dmz_router => 2],
+		[$finance_router => 2],
+		[$hr_router => 2],
+		[$gw => 2],
+		[$dmz_router => 3],
 	]
 );
 
