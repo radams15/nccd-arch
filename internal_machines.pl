@@ -39,7 +39,7 @@ our $int_dns = Machine->new (
 			via => $internal_router->ips->{1}, # internal_router eth1
 		),
 	],
-	extra => "\nchmod +r /etc/dnsmasq_static_hosts.conf\nsystemctl start dnsmasq",
+	extra => "\nchmod +r /etc/dnsmasq_static_hosts.conf\n/etc/init.d/dnsmasq start",
 );
 
 our $int_www = Machine->new (
@@ -56,7 +56,7 @@ our $int_www = Machine->new (
 			via => $internal_router->ips->{1}, # internal_router eth1
 		),
 	],
-	extra => "\na2enmod ssl\na2ensite default-ssl\nsystemctl start apache2",
+	extra => "\na2enmod ssl\na2ensite default-ssl\n/etc/init.d/apache2 start",
 );
 
 our $ldap = Machine->new (
@@ -107,7 +107,7 @@ our $squid = Machine->new (
 			via => $internal_router->ips->{1}, # internal_router eth1
 		),
 	],
-	extra => "\ntouch /var/log/squid/access.log\nchmod 777 /var/log/squid/access.log\nsystemctl start squid.service",
+	extra => "\ntouch /var/log/squid/access.log\nchmod 777 /var/log/squid/access.log\nchown -R proxy:proxy /var/log/squid/\n/etc/init.d/squid start",
 );
 
 

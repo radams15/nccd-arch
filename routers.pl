@@ -166,7 +166,7 @@ our $internal_router = Machine->new (
 		),
 	],
 	rules => [
-	
+		
 	],
 );
 
@@ -203,47 +203,30 @@ our $internal_dmz_router = Machine->new (
 	],
 );
 
-our $hr_router = Machine->new (
-	name => 'HrRouter',
+our $management_router = Machine->new (
+	name => 'ManagementRouter',
 	interfaces => [
 		Interface->new (
 			eth => 0,
-			ip => '10.10.0.4/24',
+			ip => '10.1.0.1/16',
 		),
 		Interface->new (
 			eth => 1,
-			ip => '10.20.0.1/16',
-		),
-		Interface->new (
-			eth => 2,
-			ip => '192.168.2.5/24',
+			ip => '192.168.2.1/24',
 		),
 	],
 	routes => [
 		Route->new (
 			dst => 'default',
-			via => $internal_router->ips->{2}, # internal_router eth0
+			via => $internal_router->ips->{3}, # internal_router eth3
 		),
 	],
 	attachments => [ # eth0 -> staff_switch
-		Attachment->new (
-			lan => $hr_lan,
-			eth => 1,
-		),
+
 	],
-	rules => [
-		Rule->new (
-			table => 'nat',
-			chain => 'POSTROUTING',
-			to_src => '10.10.0.4',
-			action => 'SNAT',
-		),
-	],
-	extra => "\
-systemctl start isc-dhcp-server
-	",
 );
 
+=pod
 our $finance_router = Machine->new (
 	name => 'FinanceRouter',
 	interfaces => [
@@ -273,42 +256,32 @@ our $finance_router = Machine->new (
 		),
 	],
 	rules => [
-		Rule->new (
-			table => 'nat',
-			chain => 'POSTROUTING',
-			to_src => '10.10.0.5',
-			action => 'SNAT',
-		),
-	],
-	extra => "\
-systemctl start isc-dhcp-server
-	",
-);
 
-our $management_router = Machine->new (
-	name => 'ManagementRouter',
+	],
+
+);
+=cut
+
+our $staff_dhcp = Machine->new (
+	name => 'StaffDhcp',
 	interfaces => [
 		Interface->new (
 			eth => 0,
-			ip => '10.1.0.1/16',
-		),
-		Interface->new (
-			eth => 2,
-			ip => '192.168.2.1/24',
+			ip => '10.10.0.6/16',
 		),
 	],
 	routes => [
 		Route->new (
 			dst => 'default',
-			via => $internal_router->ips->{3}, # internal_router eth3
+			via => $internal_router->ips->{2}, # internal_router eth3
 		),
 	],
-	attachments => [ # eth0 -> staff_switch
-		Attachment->new (
-			lan => $finance_lan,
-			eth => 1,
-		),
+	attachments => [
+		# eth0 -> staff_switch
 	],
+	extra => "\
+/etc/init.d/isc-dhcp-server start
+	",
 );
 
 1;

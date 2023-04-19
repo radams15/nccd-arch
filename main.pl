@@ -16,7 +16,7 @@ my $lab = Lab->new (
 	out_dir => 'res',
 	data_dir => 'data',
 	shared => "resolvconf -u
-systemctl start ssh",
+/etc/init.d/ssh start",
 );
 
 ####### LANs #######
@@ -60,8 +60,6 @@ our (
 	$dmz_router,
     $internal_router,
     $internal_dmz_router,
-    $hr_router,
-    $finance_router,
     $management_router,
 );
 
@@ -74,6 +72,8 @@ our (
     $ext_office,
 );
 
+# Internal
+
 our (
     $int_dns,
     $int_www,
@@ -82,6 +82,7 @@ our (
     $squid,
     $vpn,
     $management_a,
+	$staff_dhcp,
 );
 
 # Switches
@@ -91,7 +92,7 @@ our $staff_switch = Machine->new (
 	interfaces => [
 		map {
 			Interface->new (eth=>$_);
-		} (0..4),
+		} (0..5),
 	],
 	attachments => [
 		Attachment->new (lan  => $staff_lan, eth => 0)
@@ -170,6 +171,28 @@ our $external_management_switch = Machine->new (
 	vlan_filtering => 0,
 );
 
+our $finance_switch = Machine->new (
+	name => 'FinanceSwitch',
+	interfaces => [
+		map {
+			Interface->new (eth=>$_);
+		} (0..$STAFF_PER_DEPARTMENT),
+	],
+	switch => 1,
+	vlan_filtering => 0,
+);
+
+our $hr_switch = Machine->new (
+	name => 'HrSwitch',
+	interfaces => [
+		map {
+			Interface->new (eth=>$_);
+		} (0..$STAFF_PER_DEPARTMENT),
+	],
+	switch => 1,
+	vlan_filtering => 0,
+);
+
 ####### Extra Configuration #######
 
 
@@ -182,14 +205,14 @@ my @switches = (
 	$internal_dmz_switch,
 	$internal_management_switch,
 	$external_management_switch,
+	$hr_switch,
+	$finance_switch,
 );
 
 my @routers = (
 	$dmz_router,
     $internal_router,
     $internal_dmz_router,
-    $hr_router,
-    $finance_router,
     $management_router,
 );
 
@@ -210,31 +233,33 @@ my @internal_machines = (
 	$mail,
 	$squid,
 	$vpn,
+	$staff_dhcp,
 );
 
 my %deps;
 
-my @staff_machines;
+my @hr_machines;
+my @finance_machines;
 
 # Add 3 HR machines.
 for my $staff_id (1..$STAFF_PER_DEPARTMENT) {
-	my $staff_machine = &make_staff('HR', $staff_id, $hr_lan, '10.20.0.%d/24');
-	$deps{$staff_machine->{name}} = [$hr_router->{name}];
-	push @staff_machines, $staff_machine;
+	my $staff_machine = &make_staff('HR', $staff_id, '10.20.0.%d/24');
+	$deps{$staff_machine->{name}} = [$staff_dhcp->{name}];
+	push @hr_machines, $staff_machine;
 }
 
 # Add 3 finance machines.
 for my $staff_id (1..$STAFF_PER_DEPARTMENT) {
-	my $staff_machine = &make_staff('Finance', $staff_id, $finance_lan, '10.30.0.%d/24');
-	$deps{$staff_machine->{name}} = [$finance_router->{name}];
-	push @staff_machines, $staff_machine;
+	my $staff_machine = &make_staff('Finance', $staff_id, '10.30.0.%d/24');
+	$deps{$staff_machine->{name}} = [$staff_dhcp->{name}];
+	push @finance_machines, $staff_machine;
 }
 
 my @management_machines = (
 	$management_a,
 );
 
-push @internal_machines, (@staff_machines, @management_machines);
+push @internal_machines, (@hr_machines, @finance_machines, @management_machines);
 
 # Connect all the internal staff devices to the switch
 switch_connect(
@@ -243,8 +268,9 @@ switch_connect(
 	machines => [
 		$internal_dmz_router,
 		$vpn,
-		$hr_router,
-		$finance_router,
+		$finance_switch,
+		$hr_switch,
+		$staff_dhcp,
 	]
 );
 
@@ -288,12 +314,23 @@ switch_connect(
 	machines => [
 		[$internal_router => 3],
 		[$internal_dmz_router => 2],
-		[$finance_router => 2],
-		[$hr_router => 2],
 		[$gw => 2],
 		[$dmz_router => 3],
 	]
 );
+
+switch_connect(
+	switch => $hr_switch,
+	start => 1,
+	machines => \@hr_machines,
+);
+
+switch_connect(
+	switch => $finance_switch,
+	start => 1,
+	machines => \@finance_machines,
+);
+
 
 # Allow ICMP packets to be forwarded by all machines (for testing, remove for submission)
 for my $machine (@internal_machines, @external_machines) {
@@ -305,11 +342,13 @@ for my $machine (@internal_machines, @external_machines) {
 }
 
 # DNAT mail ports from the gateway to the mailserver on the internal DMZ.
+=pod
 dnat (
 	src => $gw,
 	dst =>'172.16.0.6',
 	ports => [25, 587, 993]
 );
+=cut
 
 open HOSTS, '>', 'data/Int-DNS/etc/dnsmasq_static_hosts.conf';
 for my $machine ($int_dns, $int_www, $ldap, $mail, $squid, $vpn) {
@@ -322,7 +361,6 @@ for my $machine ($int_dns, $int_www, $ldap, $mail, $squid, $vpn) {
 	print HOSTS "\t$machine->{name}.fido22.cyber.test\n";
 }
 close HOSTS;
-
 
 #install_packages($lab, $mail, "dovecot-core libexttextcat-2.0-0 libexttextcat-data libsodium23 postfix");
 
