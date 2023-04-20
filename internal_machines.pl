@@ -39,7 +39,10 @@ our $int_dns = Machine->new (
 			via => $internal_router->ips->{1}, # internal_router eth1
 		),
 	],
-	extra => "\nchmod +r /etc/dnsmasq_static_hosts.conf\n/etc/init.d/dnsmasq start",
+	extra => "
+echo search_domains_append=fido22.cyber.test >> /etc/resolvconf.conf
+chmod +r /etc/dnsmasq_static_hosts.conf
+/etc/init.d/dnsmasq start",
 );
 
 our $int_www = Machine->new (

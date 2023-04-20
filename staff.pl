@@ -24,8 +24,8 @@ search fido22.cyber.test
 EOF
 
 cat >> /root/.bashrc << EOF
-export http_proxy='172.26.0.2:3129'
-export https_proxy='172.26.0.2:3129'
+export http_proxy='squid:3129'
+export https_proxy='squid:3129'
 EOF
 
 dhclient&",

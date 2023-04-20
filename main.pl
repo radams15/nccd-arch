@@ -15,8 +15,7 @@ my $lab = Lab->new (
 	author => 'Rhys Adams',
 	out_dir => 'res',
 	data_dir => 'data',
-	shared => "resolvconf -u
-/etc/init.d/ssh start",
+	shared => "/etc/init.d/ssh start",
 );
 
 ####### LANs #######
