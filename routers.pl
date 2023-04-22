@@ -55,7 +55,18 @@ our $gw = Machine->new (
 		),
 	],
 	rules => [
-	
+		Rule->new (
+			policy => 'FORWARD DROP',
+		),
+		Rule->new ( # Allow forwarding port 80,443/tcp from proxy to web.
+			stateful => 1,
+			chain => 'FORWARD',
+			proto => 'TCP',
+			dport => [80,443],
+			src => '172.26.0.2',
+			out => 'eth0',
+			action => 'ACCEPT',
+		),
 	],
 );
 
@@ -116,7 +127,18 @@ our $dmz_router = Machine->new (
 		),
 	],
 	rules => [
-	
+		Rule->new (
+			policy => 'FORWARD DROP',
+		),
+		Rule->new ( # Allow forwarding port 80,443/tcp from proxy to gateway.
+			stateful => 1,
+			chain => 'FORWARD',
+			proto => 'TCP',
+			dport => [80,443],
+			src => '172.26.0.2',
+			out => 'eth0',
+			action => 'ACCEPT',
+		),
 	],
 );
 
@@ -166,7 +188,36 @@ our $internal_router = Machine->new (
 		),
 	],
 	rules => [
-		
+		Rule->new (
+			policy => 'FORWARD DROP',
+		),
+		Rule->new ( # Allow forwarding port 80,443/tcp from enterprise zone to proxy.
+			stateful => 1,
+			chain => 'FORWARD',
+			proto => 'TCP',
+			dport => '80,443',
+			dst => '172.26.0.2',
+			in => 'eth2',
+			action => 'ACCEPT',
+		),
+		Rule->new ( # Allow forwarding port 53/udp from enterprise zone to IntDNS.
+			stateful => 1,
+			chain => 'FORWARD',
+			proto => 'UDP',
+			dport => '53',
+			dst => '172.26.0.4',
+			in => 'eth2',
+			action => 'ACCEPT',
+		),
+		Rule->new ( # Allow forwarding port 25,587,993/tcp from enterprise zone to Mail.
+			stateful => 1,
+			chain => 'FORWARD',
+			proto => 'TCP',
+			dport => [25,587,993],
+			dst => '172.16.0.2',
+			in => 'eth2',
+			action => 'ACCEPT',
+		),
 	],
 );
 
@@ -199,7 +250,34 @@ our $internal_dmz_router = Machine->new (
 		),
 	],
 	rules => [
-	
+		Rule->new (
+			policy => 'FORWARD DROP',
+		),
+		Rule->new ( # Allow forwarding within internal DMZ zone.
+			stateful => 1,
+			chain => 'FORWARD',
+			in => 'eth1',
+			out => 'eth1',
+			action => 'ACCEPT',
+		),
+		Rule->new ( # Allow forwarding port 389/tcp from enterprise zone.
+			stateful => 1,
+			chain => 'FORWARD',
+			in => 'eth0',
+			out => 'eth1',
+			proto => 'TCP',
+			dport => '389',
+			action => 'ACCEPT',
+		),
+		Rule->new ( # Allow forwarding port 389/udp from enterprise zone.
+			stateful => 1,
+			chain => 'FORWARD',
+			in => 'eth0',
+			out => 'eth1',
+			proto => 'UDP',
+			dport => '389',
+			action => 'ACCEPT',
+		),
 	],
 );
 
@@ -221,48 +299,15 @@ our $management_router = Machine->new (
 			via => $internal_router->ips->{3}, # internal_router eth3
 		),
 	],
-	attachments => [ # eth0 -> staff_switch
-
-	],
-);
-
-=pod
-our $finance_router = Machine->new (
-	name => 'FinanceRouter',
-	interfaces => [
-		Interface->new (
-			eth => 0,
-			ip => '10.10.0.5/24',
-		),
-		Interface->new (
-			eth => 1,
-			ip => '10.30.0.1/16',
-		),
-		Interface->new (
-			eth => 2,
-			ip => '192.168.2.4/24',
-		),
-	],
-	routes => [
-		Route->new (
-			dst => 'default',
-			via => $internal_router->ips->{2}, # internal_router eth0
-		),
-	],
-	attachments => [ # eth0 -> staff_switch
-		Attachment->new (
-			lan => $finance_lan,
-			eth => 1,
-		),
-	],
 	rules => [
-
+		Rule->new (
+			policy => 'FORWARD DROP',
+		),
 	],
-
 );
-=cut
 
-our $staff_dhcp = Machine->new (
+
+our $staff_dhcp = Machine->new ( # TODO: move to internal_machines as not a router.
 	name => 'StaffDhcp',
 	interfaces => [
 		Interface->new (
