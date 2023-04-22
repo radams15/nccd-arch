@@ -74,7 +74,7 @@ our $ext_dns = Machine->new (
 			eth => 0
 		),
 	],
-	extra => "\nchmod +r /etc/dnsmasq_static_hosts.conf\nsystemctl start dnsmasq",
+	extra => "\nchmod +r /etc/dnsmasq_static_hosts.conf\n/etc/init.d/dnsmasq start",
 );
 
 our $ext_www = Machine->new (
@@ -97,7 +97,7 @@ our $ext_www = Machine->new (
 			eth => 0
 		),
 	],
-	extra => "\na2enmod ssl\na2ensite default-ssl\nsystemctl start apache2",
+	extra => "\na2enmod ssl\na2ensite default-ssl\n/etc/init.d/apache2 start",
 );
 
 
