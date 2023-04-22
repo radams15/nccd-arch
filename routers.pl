@@ -306,27 +306,4 @@ our $management_router = Machine->new (
 	],
 );
 
-
-our $staff_dhcp = Machine->new ( # TODO: move to internal_machines as not a router.
-	name => 'StaffDhcp',
-	interfaces => [
-		Interface->new (
-			eth => 0,
-			ip => '10.10.0.6/16',
-		),
-	],
-	routes => [
-		Route->new (
-			dst => 'default',
-			via => $internal_router->ips->{2}, # internal_router eth3
-		),
-	],
-	attachments => [
-		# eth0 -> staff_switch
-	],
-	extra => "\
-/etc/init.d/isc-dhcp-server start
-	",
-);
-
 1;
