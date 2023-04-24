@@ -28,6 +28,7 @@ export http_proxy='squid:3129'
 export https_proxy='squid:3129'
 EOF
 
+sleep 10
 dhclient&",
 	);
 }

@@ -56,7 +56,7 @@ require './internal_machines.pl';
 
 our (
     $gw,
-	$dmz_router,
+    $dmz_router,
     $internal_router,
     $internal_dmz_router,
     $management_router,
@@ -98,6 +98,7 @@ our $staff_switch = Machine->new (
 	],
 	switch => 1,
 	vlan_filtering => 0,
+	disable_stp => 1,
 );
 
 our $dmz_switch = Machine->new (
@@ -369,4 +370,5 @@ $lab->dump(
 		@internal_machines,
 	],
 	deps => \%deps,
+	disable_firewalls => 1,
 );
