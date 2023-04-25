@@ -22,7 +22,7 @@ jobs:
 
       - name: Get linfo
         run: |
-          curl -L https://github.com/radams15/netkit-jh-build/releases/download/2.0.0/core.tar.bz2 -o netkit-core.tar.bz2
+          curl -L https://github.com/radams15/netkit-jh-build/releases/download/2.0.0/netkit-core-2.0.0.tar.bz2 -o netkit-core.tar.bz2
           sudo tar -xf netkit-core.tar.bz2 -C /opt/
 
 
