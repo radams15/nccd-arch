@@ -6,10 +6,8 @@ use warnings;
 use Netkit;
 
 sub make_staff {
-	my ($designation, $id, $lan_mask) = @_;
-	
-	my $last_ip_digit = 4 + $id;
-	
+	my ($designation, $id) = @_;
+
 	Machine->new (
 		name => "Staff-$designation-$id",
 		interfaces => [
@@ -33,19 +31,5 @@ dhclient&",
 	);
 }
 
-our $management_a = Machine->new (
-	name => 'ManagementA',
-	interfaces => [
-		Interface->new (
-			eth => 0,
-			ip => '10.1.0.2/16',
-		),
-	],
-	routes => [
-		Route->new (
-			dst => 'default',
-			via => '10.1.0.1', # internal_router eth0
-		),
-	],
-);
+
 1;

@@ -138,6 +138,10 @@ our $staff_dhcp = Machine->new (
 			eth => 0,
 			ip => '10.10.0.6/16',
 		),
+		Interface->new (
+			eth => 1,
+			ip => '10.10.0.7/16',
+		),
 	],
 	routes => [
 		Route->new (
@@ -146,7 +150,7 @@ our $staff_dhcp = Machine->new (
 		),
 	],
 	attachments => [
-		# eth0 -> staff_switch
+		# eth0, eth1 -> staff_switch
 	],
 	extra => "\
 /etc/init.d/isc-dhcp-server start

@@ -8,6 +8,8 @@ use Netkit;
 
 my $STAFF_PER_DEPARTMENT = 1;
 
+my $VLAN_FILTERING = 0;
+
 
 my $lab = Lab->new (
 	name => 'TestLab',
@@ -40,8 +42,8 @@ our $external_management_lan = Lan->new ('EXT_MANAGEMENT');
 ####### VLANs #######
 
 our $management_vlan = Vlan->new (4000);
-our $dmz_vlan = Vlan->new(2000);
-our $staff_vlan = Vlan->new (1000);
+our $hr_vlan = Vlan->new (1000);
+our $finance_vlan = Vlan->new (2000);
 our $all_vlans = Vlan->new ('2-4094');
 
 ####### Machines #######
@@ -91,14 +93,17 @@ our $staff_switch = Machine->new (
 	interfaces => [
 		map {
 			Interface->new (eth=>$_);
-		} (0..5),
+		} (0..6),
 	],
 	attachments => [
-		Attachment->new (lan  => $staff_lan, eth => 0)
+		Attachment->new (lan  => $staff_lan, eth => 0, vlan => $all_vlans)
 	],
 	switch => 1,
-	vlan_filtering => 0,
+	vlan_filtering => $VLAN_FILTERING,
 	disable_stp => 1,
+	extra => '
+
+'
 );
 
 our $dmz_switch = Machine->new (
@@ -112,7 +117,7 @@ our $dmz_switch = Machine->new (
 		Attachment->new (lan  => $dmz_lan, eth => 0)
 	],
 	switch => 1,
-	vlan_filtering => 0,
+	vlan_filtering => $VLAN_FILTERING,
 );
 
 our $extranet_switch = Machine->new (
@@ -126,7 +131,7 @@ our $extranet_switch = Machine->new (
 		Attachment->new (lan  => $extranet_lan, eth => 0)
 	],
 	switch => 1,
-	vlan_filtering => 0,
+	vlan_filtering => $VLAN_FILTERING,
 );
 
 our $internal_dmz_switch = Machine->new (
@@ -140,7 +145,7 @@ our $internal_dmz_switch = Machine->new (
 		Attachment->new (lan  => $internal_dmz_lan, eth => 0)
 	],
 	switch => 1,
-	vlan_filtering => 0,
+	vlan_filtering => $VLAN_FILTERING,
 );
 
 our $internal_management_switch = Machine->new (
@@ -154,7 +159,7 @@ our $internal_management_switch = Machine->new (
 		Attachment->new (lan  => $management_lan, eth => 0)
 	],
 	switch => 1,
-	vlan_filtering => 0,
+	vlan_filtering => $VLAN_FILTERING,
 );
 
 our $external_management_switch = Machine->new (
@@ -168,30 +173,78 @@ our $external_management_switch = Machine->new (
 		Attachment->new (lan  => $external_management_lan, eth => 0)
 	],
 	switch => 1,
-	vlan_filtering => 0,
+	vlan_filtering => $VLAN_FILTERING,
 );
 
-our $finance_switch = Machine->new (
-	name => 'FinanceSwitch',
+our $finance_switch_a = Machine->new (
+	name => 'FinanceSwitchA',
 	interfaces => [
 		map {
 			Interface->new (eth=>$_);
 		} (0..$STAFF_PER_DEPARTMENT),
 	],
 	switch => 1,
-	vlan_filtering => 0,
+	vlan_filtering => $VLAN_FILTERING,
 );
 
-our $hr_switch = Machine->new (
-	name => 'HrSwitch',
+our $hr_switch_a = Machine->new (
+	name => 'HrSwitchA',
+	interfaces => [
+		map {
+			Interface->new (
+				eth=>$_,
+			);
+		} (0..$STAFF_PER_DEPARTMENT),
+	],
+	switch => 1,
+	vlan_filtering => $VLAN_FILTERING,
+);
+
+our $finance_switch_b = Machine->new (
+	name => 'FinanceSwitchB',
 	interfaces => [
 		map {
 			Interface->new (eth=>$_);
 		} (0..$STAFF_PER_DEPARTMENT),
 	],
 	switch => 1,
-	vlan_filtering => 0,
+	vlan_filtering => $VLAN_FILTERING,
 );
+
+our $hr_switch_b = Machine->new (
+	name => 'HrSwitchB',
+	interfaces => [
+		map {
+			Interface->new (eth=>$_);
+		} (0..$STAFF_PER_DEPARTMENT),
+	],
+	switch => 1,
+	vlan_filtering => $VLAN_FILTERING,
+);
+
+
+our $building_a_switch = Machine->new (
+	name => 'BuildingASwitch',
+	interfaces => [
+		map {
+			Interface->new (eth=>$_);
+		} (0..2),
+	],
+	switch => 1,
+	vlan_filtering => $VLAN_FILTERING,
+);
+
+our $building_b_switch = Machine->new (
+	name => 'BuildingBSwitch',
+	interfaces => [
+		map {
+			Interface->new (eth=>$_);
+		} (0..2),
+	],
+	switch => 1,
+	vlan_filtering => $VLAN_FILTERING,
+);
+
 
 ####### Extra Configuration #######
 
@@ -203,17 +256,18 @@ my @switches = (
 	$dmz_switch,
 	$extranet_switch,
 	$internal_dmz_switch,
-	$internal_management_switch,
-	$external_management_switch,
-	$hr_switch,
-	$finance_switch,
+	$hr_switch_a,
+	$finance_switch_a,
+	$hr_switch_b,
+	$finance_switch_b,
+	$building_a_switch,
+	$building_b_switch,
 );
 
 my @routers = (
 	$dmz_router,
     $internal_router,
     $internal_dmz_router,
-    $management_router,
 );
 
 my @external_machines = (
@@ -238,28 +292,25 @@ my @internal_machines = (
 
 my %deps;
 
-my @hr_machines;
-my @finance_machines;
-
-# Add 3 HR machines.
-for my $staff_id (1..$STAFF_PER_DEPARTMENT) {
-	my $staff_machine = &make_staff('HR', $staff_id, '10.20.0.%d/24');
-	$deps{$staff_machine->{name}} = [$staff_dhcp->{name}];
-	push @hr_machines, $staff_machine;
+sub get_staff {
+	my ($num, $ref) = @_;
+	my @machines;
+	
+	for my $staff_id (1..$num) {
+		my $staff_machine = &make_staff($ref, $staff_id);
+		$deps{$staff_machine->{name}} = [$staff_dhcp->{name}];
+		push @machines, $staff_machine;
+	}
+	
+	@machines;
 }
 
-# Add 3 finance machines.
-for my $staff_id (1..$STAFF_PER_DEPARTMENT) {
-	my $staff_machine = &make_staff('Finance', $staff_id, '10.30.0.%d/24');
-	$deps{$staff_machine->{name}} = [$staff_dhcp->{name}];
-	push @finance_machines, $staff_machine;
-}
+my @hr_a_machines = &get_staff($STAFF_PER_DEPARTMENT, 'HR-A');
+my @hr_b_machines = &get_staff($STAFF_PER_DEPARTMENT, 'HR-B');
+my @finance_a_machines = &get_staff($STAFF_PER_DEPARTMENT, 'Finance-A');
+my @finance_b_machines = &get_staff($STAFF_PER_DEPARTMENT, 'Finance-B');
 
-my @management_machines = (
-	$management_a,
-);
-
-push @internal_machines, (@hr_machines, @finance_machines, @management_machines);
+push @internal_machines, (@hr_a_machines, @hr_b_machines, @finance_a_machines, @finance_b_machines);
 
 # Connect all the internal staff devices to the switch
 switch_connect(
@@ -268,9 +319,10 @@ switch_connect(
 	machines => [
 		$internal_dmz_router,
 		$vpn,
-		$finance_switch,
-		$hr_switch,
-		$staff_dhcp,
+		$building_a_switch,
+		$building_b_switch,
+		[$staff_dhcp, $hr_vlan, undef, 0],
+		[$staff_dhcp, $finance_vlan, undef, 1],
 	]
 );
 
@@ -301,34 +353,68 @@ switch_connect(
 );
 
 switch_connect(
-	switch => $internal_management_switch,
+	switch => $hr_switch_a,
 	start => 1,
 	machines => [
-		$management_a,
-	]
+		map {[$_, $hr_vlan, 1]} @hr_a_machines
+	],
 );
 
 switch_connect(
-	switch => $external_management_switch,
+	switch => $hr_switch_b,
 	start => 1,
 	machines => [
-		[$internal_router => 3],
-		[$internal_dmz_router => 2],
-		[$gw => 2],
-		[$dmz_router => 3],
-	]
+		map {[$_, $hr_vlan, 1]} @hr_b_machines
+	],
 );
 
 switch_connect(
-	switch => $hr_switch,
+	switch => $finance_switch_a,
 	start => 1,
-	machines => \@hr_machines,
+	machines => [
+		map {[$_, $finance_vlan, 1]} @finance_a_machines
+	],
+);
+
+
+switch_connect(
+	switch => $finance_switch_b,
+	start => 1,
+	machines => [
+		map {[$_, $finance_vlan, 1]} @finance_b_machines
+	],
+);
+
+=pod
+switch_connect(
+	switch => $building_a_switch,
+	start => 1,
+	machines => [
+		[$hr_switch_a, $hr_vlan],
+		[$finance_switch_a, $finance_vlan],
+	],
 );
 
 switch_connect(
-	switch => $finance_switch,
+	switch => $building_b_switch,
 	start => 1,
-	machines => \@finance_machines,
+	machines => [
+		[$hr_switch_b, $hr_vlan],
+		[$finance_switch_b, $finance_vlan],
+	],
+);
+=cut
+
+switch_connect(
+	switch => $building_a_switch,
+	start => 1,
+	machines => [$hr_switch_a, $finance_switch_a],
+);
+
+switch_connect(
+	switch => $building_b_switch,
+	start => 1,
+	machines => [$hr_switch_b, $finance_switch_b],
 );
 
 
@@ -341,8 +427,8 @@ for my $machine (@internal_machines, @external_machines) {
 	);
 }
 
-# DNAT mail ports from the gateway to the mailserver on the internal DMZ.
 =pod
+# DNAT mail ports from the gateway to the mailserver on the internal DMZ.
 dnat (
 	src => $gw,
 	dst =>'172.16.0.6',

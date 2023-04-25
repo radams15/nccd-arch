@@ -7,6 +7,10 @@ use Cwd;
 
 use Netkit::Rule;
 
+our (
+	$all_vlans,
+);
+
 sub dnat {
 	my %args = @_;
 	my $dst = $args{dst};
@@ -46,20 +50,29 @@ sub switch_connect {
 	
 	if(ref $machines eq 'ARRAY') {
 		for (@$machines) {
-			my ($machine, $machine_eth);
+			my ($machine, $vlan, $untagged, $machine_eth);
+			
 			if(ref $_ eq 'ARRAY') {
-				($machine, $machine_eth) = @$_;
+				($machine, $vlan, $untagged, $machine_eth) = @$_;
+				$machine_eth = 0 if not defined $machine_eth;
 			}else {
 				$machine = $_;
+				$vlan = $all_vlans;
 				$machine_eth = 0;
 			}
 			
-			my $name = Attachment::generate_lan_name($switch, $machine); # Generate a unique lan name.
+			my $name = Attachment::generate_lan_name($switch, $machine)."_eth$eth"; # Generate a unique lan name.
 			my $lan = Lan->new($name); # Make a new 2-device LAN.
 			
 			# Attach to both machine and the switch
-			push @{$machine->{attachments}}, Attachment->new (lan => $lan, eth => $machine_eth);
-			push @{$switch->{attachments}}, Attachment->new (lan => $lan, eth => $eth);
+			
+			if($machine->{switch}) {
+				# If attaching to another switch, make that switch be on all VLANs.
+				push @{$machine->{attachments}}, Attachment->new (lan => $lan, eth => $machine_eth, vlan => $all_vlans);
+			} else {
+				push @{$machine->{attachments}}, Attachment->new (lan => $lan, eth => $machine_eth);
+			}
+			push @{$switch->{attachments}}, Attachment->new (lan => $lan, eth => $eth, vlan => $vlan, untagged => $untagged);
 			
 			# Then use the next NIC
 			$eth++;
@@ -80,11 +93,11 @@ sub install_packages {
 	
 	chdir $folder;
 	
-	if('/usr/bin/podman') {
+	if(-e '/usr/bin/podman') {
 		print "Using podman to download Debian Buster packages!\n";
 		system("podman run -v .:/wdir:z --workdir /wdir -it --rm debian:bullseye sh -c 'apt-get update && $cmd'");
 	} elsif (-e '/usr/bin/apt') {
-		print "Using system apt - cannot guaruntee success if system does not use Debian Bullseye!\n";
+		print "Using system apt - cannot guarantee success if system does not use Debian Bullseye!\n";
 		system($cmd);
 	} else {
 		die 'Cannot find podman or apt - cannot install packages!';
