@@ -1,0 +1,13 @@
+
+ip link set dev eth0 up
+ip link set dev eth1 up
+ip link set dev eth2 up
+ip link set dev eth3 up
+
+
+ip link add sw0 type bridge \
+   stp_state 1 \
+   priority 9000 \
+   vlan_filtering 0
+
+ip link set dev sw0 up
