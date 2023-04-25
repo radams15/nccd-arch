@@ -1,0 +1,18 @@
+###### InternalDmzRouter ######
+
+# Interface Configuration
+
+ip addr add 10.10.0.2/24 dev eth0
+ifconfig eth0 up
+
+
+ip addr add 172.36.0.1/24 dev eth1
+ifconfig eth1 up
+
+
+ip addr add 192.168.2.3/24 dev eth2
+ifconfig eth2 up
+
+# Static Route Configuration
+
+ip route add default via 10.10.0.1 
