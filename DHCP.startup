@@ -1,6 +1,10 @@
 ip addr add 10.10.0.6 dev eth0
 ifconfig eth0 up
 
+<<<<<<< HEAD
+ip r a default via 10.10.0.1
+=======
 ip route add default via 10.10.0.1
 
 /etc/init.d/isc-dhcp-server start
+>>>>>>> f0f82b4db9f1da10cc89f1f148b1aa5369825460
