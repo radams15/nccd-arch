@@ -22,12 +22,12 @@ jobs:
 
       - name: Get linfo
         run: |
-          curl -L https://github.com/netkit-jh/netkit-jh-build/releases/download/2.0.0/netkit-core-2.0.0.tar.bz2 -o netkit-core.tar.bz2
+          curl -L https://github.com/radams15/netkit-jh-build/releases/download/2.0.0/netkit-core-2.0.0.tar.bz2 -o netkit-core.tar.bz2
           sudo tar -xf netkit-core.tar.bz2 -C /opt/
 
 
       - name: Generate graph
-        run: env NETKIT_HOME=/opt/netkit-jh bash /opt/netkit-jh/bin/linfo --map=graph.png
+        run: env NETKIT_HOME=/opt/netkit-jh bash /opt/netkit-jh/bin/linfo --map=graph.svg
 
       - name: Release
         uses: "marvinpinto/action-automatic-releases@latest"
@@ -37,4 +37,4 @@ jobs:
           prerelease: true
           title: "Graph"
           files: |
-            graph.png
+            graph.svg
