@@ -1,3 +1,4 @@
+######## DMZRouter #########
 ip addr add 192.168.0.2/24 dev eth0
 ip link set eth0 up 
 
@@ -8,6 +9,7 @@ ip addr add 172.16.0.1/24 dev eth2
 ip link set eth2 up 
 
 # Routing
+
 ip route add default 192.168.0.1
 ip route add 172.26.0.0/24 via 192.168.1.2
 ip route add 10.10.0.0/16 via 192.168.1.2
@@ -15,3 +17,15 @@ ip route add 172.36.0.0/24 via 192.168.1.2
 
 # Firewall
 
+iptables--policy INPUT DROP
+iptables--policy FORWARD DROP
+iptables--policy OUTPUT DROP
+
+iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+
+iptables -A POSTROUTING -t nat -s 192.168.0.1 -o eth0 -j SNAT --to-source 201.224.131.22
+iptables -A PREROUTING -t nat -p tcp -i eth0 --match multiport --dports 25,587,993 -j DNAT --to-destination 172.16.0.2
+
+iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth2 -p tcp --match multiport --dports 25,587,993 -j ACCEPT
+iptables -A FORWARD -m conntrack --ctstate NEW -i eth0 -o eth2 -p tcp --match multiport --dports 25,587,993 -j ACCEPT
+iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -p tcp --match multiport --dports 80,443 --source 172.26.0.2 -j ACCEPT
