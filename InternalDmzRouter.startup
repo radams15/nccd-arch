@@ -2,7 +2,7 @@
 
 # Interface Configuration
 
-ip addr add 10.10.0.2/24 dev eth0
+ip addr add 10.10.0.2/16 dev eth0
 ifconfig eth0 up
 
 

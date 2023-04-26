@@ -1,4 +1,4 @@
-ip addr add 10.10.0.3/20 dev eth0
+ip addr add 10.10.0.3/16 dev eth0
 ifconfig eth0 up
 ip route add default via 10.10.0.1
 
