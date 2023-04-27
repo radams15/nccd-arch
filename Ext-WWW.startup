@@ -4,5 +4,5 @@ ip route add default via 80.64.157.254
 
 a2enmod ssl
 a2ensite default-ssl
-systemctl start apache2
+/etc/init.d/apache2 start
 
