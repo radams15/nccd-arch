@@ -28,5 +28,6 @@ squid.fido22.cyber.test.	IN	A	172.26.0.2
 dns.fido22.cyber.test.	IN	A	172.26.0.4
 mail.fido22.cyber.test.	IN	A	172.16.0.2
 www.fido22.cyber.test.	IN	A	172.26.0.4
-vpn.fido22.cyber.test.	IN	A	10.0.0.3
 ldap.fido22.cyber.test.	IN	A	172.36.0.2
+vpn.fido22.cyber.test.	IN	A	10.0.0.3
+dhcp.fido22.cyber.test.	IN	A	10.0.0.6

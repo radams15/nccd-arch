@@ -16,8 +16,26 @@ zone "fido22.cyber.test" IN {
 		allow-transfer { any; };
 };
 
-zone "172.in-addr.arpa" {
+zone "0.16.172.in-addr.arpa" {
         type master;
-        file "/etc/bind/db.172";
+        file "/etc/bind/db.172.16";
+        notify yes;
+};
+
+zone "0.26.172.in-addr.arpa" {
+        type master;
+        file "/etc/bind/db.172.26";
+        notify yes;
+};
+
+zone "0.36.172.in-addr.arpa" {
+        type master;
+        file "/etc/bind/db.172.36";
+        notify yes;
+};
+
+zone "0.10.in-addr.arpa" {
+        type master;
+        file "/etc/bind/db.10.0";
         notify yes;
 };
