@@ -1,0 +1,36 @@
+///////////////
+//
+// dns1 named.conf.options
+//
+// default debian named.conf includes this file first
+//
+///////////////
+
+
+
+// these are server-wide configuration options
+options {
+	// all relative paths have this as the origin
+	directory "/var/cache/bind";
+	
+	// increase work effort to exploit vulnerability of specific version
+	version "Version not available.";
+
+	// we will build the answer to the dns query by asking other servers
+	// however, we will not verify the crypto signatures on the answers from other servers
+	recursion no;
+	dnssec-validation no;
+
+	allow-transfer { any; };
+	
+	// we will only answer queries from specific internal address ranges
+	// see acl clauses above
+	allow-query {
+		any;
+	};
+	
+	// log all queries so we can see who is asking what and when
+	querylog yes;
+};
+
+
