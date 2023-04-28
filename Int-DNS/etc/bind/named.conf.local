@@ -1,0 +1,23 @@
+///////////////
+//
+// dns1 named.conf.local
+//
+// default debian named.conf includes this file last (after options and default zones
+//
+///////////////
+// pn; 2015:  zones added
+//     2022:  changed from "master/slave" to "primary/secondary"
+//            added notify and allow transfer clauses to our secondary
+
+zone "fido22.cyber.test" IN {
+        type master;
+        file "/etc/bind/db.fido22.cyber.test";  
+        notify yes;
+		allow-transfer { any; };
+};
+
+zone "172.in-addr.arpa" {
+        type master;
+        file "/etc/bind/db.172";
+        notify yes;
+};
