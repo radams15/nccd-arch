@@ -25,6 +25,6 @@ iptables -A PREROUTING -t nat -p tcp -i eth0 --match multiport --dports 25,587,9
 
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth0 -o eth1 -p tcp --match multiport --dports 25,587,993 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -p tcp --match multiport --dports 80,443 -j ACCEPT
-iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -p udp --dport 53 -j ACCEPT
-iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -p tcp --dport 53 -j ACCEPT
+iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -s 172.26.0.4 -p udp --dport 53 -j ACCEPT
+iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -s 172.26.0.4 -p tcp --dport 53 -j ACCEPT
 
