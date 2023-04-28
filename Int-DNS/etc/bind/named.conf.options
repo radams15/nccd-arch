@@ -40,7 +40,7 @@ options {
 
 	// we will build the answer to the dns query by asking other servers
 	// however, we will not verify the crypto signatures on the answers from other servers
-	recursion no;
+	recursion yes;
 	dnssec-validation no;
 
 	allow-transfer { any; };
