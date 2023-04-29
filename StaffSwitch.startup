@@ -10,7 +10,7 @@ ip link set dev eth5 up
 ip link add sw0 type bridge \
    stp_state 1 \
    priority 9000 \
-   vlan_filtering 0
+   vlan_filtering 1
 
 ip link set dev eth0 group 11
 ip link set dev eth1 group 11
@@ -21,5 +21,12 @@ ip link set dev eth5 group 11
 
 ip link set group 11 master sw0
 ip link set group 11 promisc on
+
+bridge vlan add vid 1234 pvid untagged dev eth4
+
+for i in 0 1 2 3 4 5 6
+do
+	bridge vlan add vid 2-4094 dev eth${i}
+done
 
 ip link set dev sw0 up
