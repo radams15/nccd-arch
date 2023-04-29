@@ -7,7 +7,7 @@
 ;   * The '@' symbol represents the the zone name
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $TTL	8h
-@	IN	SOA     Ext-DNS.example.com.    root.example.com. (
+@	IN	SOA     Ext-DNS.com.    root.com. (
 		6 ; serial
 		8h         ; refresh
 		2h         ; retry
@@ -16,7 +16,7 @@ $TTL	8h
 		)
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ; nameserver(s)
-@	IN	NS	Ext-DNS.example.com.
+@	IN	NS	Ext-DNS.com.
 @	IN	A	8.8.8.8
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
