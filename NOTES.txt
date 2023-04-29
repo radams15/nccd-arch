@@ -3,3 +3,11 @@
 https://www.digitalocean.com/community/tutorials/how-to-configure-bind-as-a-private-network-dns-server-on-ubuntu-20-04
 
 https://www.cloudflare.com/en-gb/learning/dns/what-is-recursive-dns/
+
+# VLANs
+
+DHCP - 1234
+
+Corporate Comms - vid 1111
+Finance - vid 2222
+Hr - vid 3333
