@@ -13,8 +13,9 @@ ifconfig eth1 up
 ip addr add 10.10.0.1/16 dev eth2
 ifconfig eth2 up
 
+
 ip addr add 192.168.4.2/24 dev eth3
-ifconfig eth2 up
+ifconfig eth3 up
 
 
 # Static Route Configuration
