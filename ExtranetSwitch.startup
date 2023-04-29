@@ -3,7 +3,6 @@ ip link set dev eth0 up
 ip link set dev eth1 up
 ip link set dev eth2 up
 ip link set dev eth3 up
-ip link set dev eth4 up
 
 
 ip link add sw0 type bridge \
@@ -15,7 +14,6 @@ ip link set dev eth0 group 11
 ip link set dev eth1 group 11
 ip link set dev eth2 group 11
 ip link set dev eth3 group 11
-ip link set dev eth4 group 11
 
 ip link set group 11 master sw0
 ip link set group 11 promisc on
