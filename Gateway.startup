@@ -22,6 +22,7 @@ iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 
 iptables -A POSTROUTING -t nat -o eth0 -j SNAT --to-source 201.224.131.24
 iptables -A PREROUTING -t nat -p tcp -i eth0 --match multiport --dports 25,587,993 -j DNAT --to-destination 172.16.0.2
+iptables -A PREROUTING -t nat -p tcp -i eth0 --dport 1194 -j DNAT --to-destination 10.10.0.3
 
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth0 -o eth1 -p tcp --match multiport --dports 25,587,993 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -p tcp --match multiport --dports 80,443 -j ACCEPT
