@@ -33,3 +33,4 @@ iptables -A FORWARD -m state --state NEW -s 10.10.0.0/16 -d 172.26.0.2 -p tcp --
 iptables -A FORWARD -m state --state NEW -s 10.10.0.0/16 -d 172.26.0.4 -p udp --dport 53 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -s 172.26.0.4 -p tcp --dport 53 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -s 172.26.0.4 -p udp --dport 53 -j ACCEPT
+iptables -A FORWARD -m conntrack --ctstate NEW -i eth0 -o eth2 -p tcp --dport 1194 -j ACCEPT

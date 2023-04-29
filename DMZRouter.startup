@@ -26,3 +26,4 @@ iptables -A FORWARD -m conntrack --ctstate NEW -i eth0 -o eth2 -p tcp --match mu
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -p tcp --match multiport --dports 80,443 --source 172.26.0.2 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -s 172.26.0.4 -p tcp --dport 53 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -s 172.26.0.4 -p udp --dport 53 -j ACCEPT
+iptables -A FORWARD -m conntrack --ctstate NEW -i eth0 -o eth1 -p tcp --dport 1194 -j ACCEPT
