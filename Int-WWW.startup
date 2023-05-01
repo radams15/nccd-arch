@@ -4,4 +4,4 @@ ip route add default via 172.26.0.1
 
 a2enmod ssl
 a2ensite default-ssl
-systemctl start apache2
+/etc/init.d/apache2 start

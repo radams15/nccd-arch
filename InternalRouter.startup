@@ -19,14 +19,17 @@ ip addr add 192.168.4.2/24 dev eth3
 ifconfig eth2 up
 
 
-for vlan in ${ENTERPRISE_VLAN_MEMBERS[@]}
-do
-	ip link add link eth2 name eth2.$vlan type vlan id $vlan
+ip link add link eth2 name eth2.1111 type vlan id 1111
+ip addr add 10.10.2.1/23 brd 10.10.3.254 dev eth2.1111
+ip link set eth2.1111 up
 
-	ip addr add 10.10.$(($vlan/1111)).1/24 brd 10.10.$(($vlan/1111)).255 dev eth2.$vlan
+ip link add link eth2 name eth2.2222 type vlan id 2222
+ip addr add 10.10.4.1/23 brd 10.10.5.254 dev eth2.2222
+ip link set eth2.2222 up
 
-	ip link set eth2.$vlan up
-done
+ip link add link eth2 name eth2.3333 type vlan id 3333
+ip addr add 10.10.6.1/23 brd 10.10.7.254 dev eth2.3333
+ip link set eth2.3333 up
 
 # Static Route Configuration
 
