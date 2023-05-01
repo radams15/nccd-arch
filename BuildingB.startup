@@ -31,3 +31,4 @@ bridge vlan add vid 3333 pvid untagged dev eth1
 bridge vlan add vid 2-4094 dev eth0
 
 ip link set dev sw0 up
+/etc/init.d/ssh start

@@ -16,3 +16,4 @@ ip link set eth0.2222 up
 ip link set eth0.3333 up
 
 /etc/init.d/isc-dhcp-server start
+/etc/init.d/ssh start

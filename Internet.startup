@@ -7,3 +7,4 @@ ip link set up dev eth2
 ip addr add 80.64.157.254/16 dev eth3
 ip link set up dev eth3
 
+/etc/init.d/ssh start

@@ -30,3 +30,4 @@ do
 done
 
 ip link set dev sw0 up
+/etc/init.d/ssh start

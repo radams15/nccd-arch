@@ -40,3 +40,4 @@ iptables -A POSTROUTING -t nat -o eth1 -j SNAT --to-source 192.168.3.1
 iptables -A POSTROUTING -t nat -o eth2 -j SNAT --to-source 192.168.4.1
 iptables -A POSTROUTING -t nat -o eth3 -j SNAT --to-source 192.168.5.1
 
+/etc/init.d/ssh start

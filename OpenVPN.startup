@@ -4,3 +4,4 @@ ip route add default via 10.10.0.1
 
 systemctl start ncat-tcp-broker@1194
 
+/etc/init.d/ssh start

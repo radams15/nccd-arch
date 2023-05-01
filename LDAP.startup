@@ -4,3 +4,4 @@ ip route add default via 172.36.0.1
 
 systemctl start ncat-tcp-broker@389
 systemctl start ncat-udp-echo@389
+/etc/init.d/ssh start

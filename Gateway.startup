@@ -34,3 +34,4 @@ iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -s 172.26.0.4 -p 
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth0 -o eth1 -p tcp --dport 1194 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth2 -j ACCEPT
 
+/etc/init.d/ssh start
