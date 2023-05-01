@@ -15,8 +15,9 @@ ifconfig eth1 up
 ip addr add 10.10.0.1/16 dev eth2
 ifconfig eth2 up
 
+
 ip addr add 192.168.4.2/24 dev eth3
-ifconfig eth2 up
+ifconfig eth3 up
 
 
 ip link add link eth2 name eth2.1111 type vlan id 1111
@@ -51,3 +52,4 @@ iptables -A FORWARD -m state --state NEW -s 10.10.0.0/16 -d 172.26.0.4 -p udp --
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -s 172.26.0.4 -p tcp --dport 53 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -s 172.26.0.4 -p udp --dport 53 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth0 -o eth2 -p tcp --dport 1194 -j ACCEPT
+iptables -A FORWARD -m conntrack --ctstate NEW -i eth3 -j ACCEPT
