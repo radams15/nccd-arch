@@ -23,3 +23,4 @@ iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
 iptables -m state --state NEW -s 10.10.0.0/16 -d 172.36.0.2 --proto TCP --dport 389 -j ACCEPT
 iptables -m state --state NEW -s 10.10.0.0/16 -d 172.36.0.2 --proto UDP --dport 389 -j ACCEPT
+iptables -A FORWARD -m conntrack --ctstate NEW -i eth2 -j ACCEPT

@@ -35,8 +35,8 @@ iptables --policy FORWARD DROP
 iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth4 -j ACCEPT
 
-iptables -A POSTROUTING -t nat -o eth0 -j SNAT --to-source 172.46.0.2
-iptables -A POSTROUTING -t nat -o eth1 -j SNAT --to-source 172.46.0.2
-iptables -A POSTROUTING -t nat -o eth2 -j SNAT --to-source 172.46.0.2
-iptables -A POSTROUTING -t nat -o eth3 -j SNAT --to-source 172.46.0.2
+iptables -A POSTROUTING -t nat -o eth0 -j SNAT --to-source 192.168.2.1
+iptables -A POSTROUTING -t nat -o eth1 -j SNAT --to-source 192.168.3.1
+iptables -A POSTROUTING -t nat -o eth2 -j SNAT --to-source 192.168.4.1
+iptables -A POSTROUTING -t nat -o eth3 -j SNAT --to-source 192.168.5.1
 
