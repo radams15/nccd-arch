@@ -2,8 +2,6 @@
 
 # Interface Configuration
 
-ENTERPRISE_VLAN_MEMBERS=(1111 2222 3333)
-
 ip addr add 192.168.1.2/24 dev eth0
 ifconfig eth0 up
 
