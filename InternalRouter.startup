@@ -2,6 +2,8 @@
 
 # Interface Configuration
 
+ENTERPRISE_VLAN_MEMBERS=(1111 2222 3333)
+
 ip addr add 192.168.1.2/24 dev eth0
 ifconfig eth0 up
 
@@ -16,6 +18,15 @@ ifconfig eth2 up
 ip addr add 192.168.4.2/24 dev eth3
 ifconfig eth2 up
 
+
+for vlan in ${ENTERPRISE_VLAN_MEMBERS[@]}
+do
+	ip link add link eth2 name eth2.$vlan type vlan id $vlan
+
+	ip addr add 10.10.$(($vlan/1111)).1/24 brd 10.10.$(($vlan/1111)).255 dev eth2.$vlan
+
+	ip link set eth2.$vlan up
+done
 
 # Static Route Configuration
 

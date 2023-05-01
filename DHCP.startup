@@ -8,8 +8,8 @@ ip link add link eth0 name eth0.2222 type vlan id 2222
 ip link add link eth0 name eth0.3333 type vlan id 3333
 
 ip addr add 10.10.1.0/24 brd 10.10.1.255 dev eth0.1111
-ip addr add 10.10.1.0/24 brd 10.10.1.255 dev eth0.2222
-ip addr add 10.10.1.0/24 brd 10.10.1.255 dev eth0.3333
+ip addr add 10.10.2.0/24 brd 10.10.2.255 dev eth0.2222
+ip addr add 10.10.3.0/24 brd 10.10.3.255 dev eth0.3333
 
 ip link set eth0.1111 up
 ip link set eth0.2222 up
