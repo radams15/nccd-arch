@@ -1,0 +1,9 @@
+ifconfig eth0 up
+
+dhclient
+
+cat >> /root/.bashrc << EOF
+export http_proxy='squid:3129'
+export https_proxy='squid:3129'
+EOF
+/etc/init.d/ssh start

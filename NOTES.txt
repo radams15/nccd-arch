@@ -11,3 +11,4 @@ DHCP - 1234
 Corporate Comms - vid 1111
 Finance - vid 2222
 Hr - vid 3333
+Guest - vid 4000

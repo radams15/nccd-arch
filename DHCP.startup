@@ -6,14 +6,17 @@ ip route add default via 10.10.0.1
 ip link add link eth0 name eth0.1111 type vlan id 1111
 ip link add link eth0 name eth0.2222 type vlan id 2222
 ip link add link eth0 name eth0.3333 type vlan id 3333
+ip link add link eth0 name eth0.4000 type vlan id 4000
 
 ip addr add 10.10.2.0/23 brd 10.10.3.254 dev eth0.1111
 ip addr add 10.10.4.0/23 brd 10.10.5.254 dev eth0.2222
 ip addr add 10.10.6.0/23 brd 10.10.7.254 dev eth0.3333
+ip addr add 10.10.8.0/23 brd 10.10.9.254 dev eth0.4000
 
 ip link set eth0.1111 up
 ip link set eth0.2222 up
 ip link set eth0.3333 up
+ip link set eth0.4000 up
 
 /etc/init.d/isc-dhcp-server start
 /etc/init.d/ssh start
