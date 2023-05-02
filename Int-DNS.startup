@@ -4,3 +4,8 @@ ip route add default via 172.26.0.1
 
 /etc/init.d/bind9 start
 /etc/init.d/ssh start
+
+ip6tables --policy INPUT DROP
+ip6tables --policy OUTPUT DROP
+ip6tables --policy FORWARD DROP
+useradd admin ; printf "pass\npass" | passwd admin

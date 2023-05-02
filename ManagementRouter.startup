@@ -32,7 +32,7 @@ ip route add 10.10.0.0/16 via 192.168.4.2
 # Firewall Rules
 
 iptables --policy FORWARD DROP
-iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth4 -j ACCEPT
 
 iptables -A POSTROUTING -t nat -o eth0 -j SNAT --to-source 192.168.2.1
@@ -41,3 +41,8 @@ iptables -A POSTROUTING -t nat -o eth2 -j SNAT --to-source 192.168.4.1
 iptables -A POSTROUTING -t nat -o eth3 -j SNAT --to-source 192.168.5.1
 
 /etc/init.d/ssh start
+
+ip6tables --policy INPUT DROP
+ip6tables --policy OUTPUT DROP
+ip6tables --policy FORWARD DROP
+useradd admin ; printf "pass\npass" | passwd admin

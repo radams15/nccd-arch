@@ -20,3 +20,8 @@ ip link set eth0.4000 up
 
 /etc/init.d/isc-dhcp-server start
 /etc/init.d/ssh start
+
+ip6tables --policy INPUT DROP
+ip6tables --policy OUTPUT DROP
+ip6tables --policy FORWARD DROP
+useradd admin ; printf "pass\npass" | passwd admin

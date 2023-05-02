@@ -35,3 +35,8 @@ iptables -A FORWARD -m conntrack --ctstate NEW -i eth0 -o eth1 -p tcp --dport 11
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth2 -j ACCEPT
 
 /etc/init.d/ssh start
+
+ip6tables --policy INPUT DROP
+ip6tables --policy OUTPUT DROP
+ip6tables --policy FORWARD DROP
+useradd admin ; printf "pass\npass" | passwd admin

@@ -32,3 +32,8 @@ iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -s 172.26.0.4 -p 
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth0 -o eth1 -p tcp --dport 1194 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth3 -j ACCEPT
 /etc/init.d/ssh start
+
+ip6tables --policy INPUT DROP
+ip6tables --policy OUTPUT DROP
+ip6tables --policy FORWARD DROP
+useradd admin ; printf "pass\npass" | passwd admin

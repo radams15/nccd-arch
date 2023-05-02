@@ -12,6 +12,24 @@ ifconfig eth1 up
 ip addr add 192.168.5.2/24 dev eth2
 ifconfig eth2 up
 
+
+ip link add link eth0 name eth0.1111 type vlan id 1111
+ip addr add 10.10.2.2/23 brd 10.10.3.254 dev eth0.1111
+ip link set eth0.1111 up
+
+ip link add link eth0 name eth0.2222 type vlan id 2222
+ip addr add 10.10.4.2/23 brd 10.10.5.254 dev eth0.2222
+ip link set eth0.2222 up
+
+ip link add link eth0 name eth0.3333 type vlan id 3333
+ip addr add 10.10.6.2/23 brd 10.10.7.254 dev eth0.3333
+ip link set eth0.3333 up
+
+ip link add link eth0 name eth0.4000 type vlan id 4000
+ip addr add 10.10.8.2/23 brd 10.10.9.254 dev eth0.4000
+ip link set eth0.4000 up
+
+
 # Static Route Configuration
 
 ip route add default via 10.10.0.1 
@@ -19,8 +37,14 @@ ip route add default via 10.10.0.1
 # Firewall Rules
 
 iptables --policy FORWARD DROP
-iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 
-iptables -A FORWARD -m state --state NEW -s 10.10.0.0/16 -d 172.36.0.2 --proto TCP --dport 389 -j ACCEPT
-iptables -A FORWARD -m state --state NEW -s 10.10.0.0/16 -d 172.36.0.2 --proto UDP --dport 389 -j ACCEPT
+iptables -A FORWARD -m conntrack --ctstate NEW -s 10.10.0.0/16 -d 172.36.0.2 --proto TCP --dport 389 -j ACCEPT
+iptables -A FORWARD -m conntrack --ctstate NEW -s 10.10.0.0/16 -d 172.36.0.2 --proto UDP --dport 389 -j ACCEPT
+iptables -A FORWARD -m conntrack --ctstate NEW -i eth2 -j ACCEPT
 /etc/init.d/ssh start
+
+ip6tables --policy INPUT DROP
+ip6tables --policy OUTPUT DROP
+ip6tables --policy FORWARD DROP
+useradd admin ; printf "pass\npass" | passwd admin

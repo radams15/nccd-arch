@@ -8,3 +8,8 @@ ip addr add 80.64.157.254/16 dev eth3
 ip link set up dev eth3
 
 /etc/init.d/ssh start
+
+ip6tables --policy INPUT DROP
+ip6tables --policy OUTPUT DROP
+ip6tables --policy FORWARD DROP
+useradd admin ; printf "pass\npass" | passwd admin
