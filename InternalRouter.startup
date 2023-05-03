@@ -55,8 +55,7 @@ iptables -A FORWARD -m conntrack --ctstate NEW -i eth1 -o eth0 -s 172.26.0.4 -p 
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth0 -o eth2 -p tcp --dport 1194 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -o eth2 -p tcp --dport 389 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate NEW -o eth2 -p udp --dport 389 -j ACCEPT
-iptables -A FORWARD --proto tcp -o eth2 --dport 389 -j ACCEPT
-iptables -A FORWARD --proto udp -o eth2 --dport 389 -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth2 -j MASQUERADE
 iptables -A FORWARD -m conntrack --ctstate NEW -i eth3 -j ACCEPT
 /etc/init.d/ssh start
 
