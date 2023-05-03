@@ -37,7 +37,6 @@ ip link set eth2.4000 up
 # Static Route Configuration
 
 ip route add default via 192.168.1.1 
-ip route add 172.36.0.0/24 via 10.10.0.2
 
 # Firewall Rules
 
@@ -65,3 +64,5 @@ ip6tables --policy INPUT DROP
 ip6tables --policy OUTPUT DROP
 ip6tables --policy FORWARD DROP
 useradd admin ; printf "pass\npass" | passwd admin
+
+/etc/init.d/bird start
