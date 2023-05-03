@@ -11,6 +11,11 @@ ip link set eth2 up
 
 # Routing
 ip route add default via 201.224.131.22
+ip route add 172.16.0.0/24 via 192.168.0.2
+ip route add 192.168.1.0/24 via 192.168.0.2
+ip route add 10.10.0.0/16 via 192.168.0.2
+ip route add 172.36.0.0/24 via 10.10.0.2
+ip route add 172.26.0.0/24 via 192.168.0.2
 
 # Firewalls
 
@@ -35,5 +40,3 @@ ip6tables --policy INPUT DROP
 ip6tables --policy OUTPUT DROP
 ip6tables --policy FORWARD DROP
 useradd admin ; printf "pass\npass" | passwd admin
-
-/etc/init.d/bird start
